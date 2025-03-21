@@ -1,49 +1,70 @@
+Legend :
+✅ Same actions
+❌ Indisponible
+
 Routes								User					/	Admin
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 
-@Get
-/billets						Voir tous mes billets 				/ 	x
+@Get :
+/account 						Voir mon compte					/		✅
+/account/balance					Voir l'argent sur mon compte			/		✅
+/account/ticket						Voir tous mes billets				/		✅
 /films							Voir tous les films disponibles cette semaine 	/ 	Voir tous les films
-/films/:id						Voir un film par son id				/ 	Voir un film par son id
-/salles							Voir toutes les salles et leur disponibilité	/	Voir tous les salles
-/salles/:id						Voir une salle par son id			/	Voir une salle par son id
-/salles/:id/seances					Voir les scéances de la salle			/	Voir les scéances de la salle
-/seances						Voir toutes les scéances			/	Voir toutes les scéances
-/seances/:id						Voir une scéance avec son id			/ 	Voir une séance par son id
-/users									x				/	Voir tous les users
-/users/:id						Voir mon compte					/	Voir un compte utilisateur
+/films/:id						Voir un film par son id				/ 		✅
+/rooms							Voir toutes les rooms et leur disponibilité	/		✅
+/rooms/:id						Voir une salle par son id			/		✅
+/rooms/:id/sessions					Voir les scéances de la salle			/		✅
+/sessions						Voir toutes les scéances			/		✅
+/sessions/:id						Voir une scéance avec son id			/ 		✅
+/users									❌				/	Voir tous les users
+/users/:id								❌				/	Voir un compte utilisateur
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 
-@Post
-/films									x				/	Enregistrer un film
-/salles									x				/ 	Enregistrer une salle
-/seances								x				/ 	Ajouter une scéance
-/users									Créer son compte		/		x
-/billet									Acheter un billet		/	Acheter un billet pour moi
+@Post :
+/account/ticket							Acheter un billet			/		✅
+/films									❌				/	Enregistrer un film
+/rooms									❌				/ 	Enregistrer une salle
+/sessions								❌				/ 	Ajouter une scéance
+/sessions/:id/reservation					Réserver la séance par son id		/		✅
+/users								Créer son compte			/		❌
+/ticket								Acheter un billet			/		✅
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 
-@Put
-/films/:id								x				/	Update un Film
-/salles/:id								x				/ 	Update une salle
-/seances/:id								x				/ 	Update une scéance
-/users/:id								Update son compte		/	Update un utilisateur
+@Patch :
+/account/balance						Ajouter de l'argent			/		✅
+/films/:id								❌				/	Update un Film
+/rooms/:id								❌				/ 	Update une salle
+/sessions/:id/update							❌				/ 	Update une scéance
+/sessions/:id/cancel						Annuler une réservation			/		✅
+/users/:id/update						Update infos son compte			/		✅
+/users/:id/promote							❌				/	Promote un user to admin
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 
-@Delete
-/films/:id								x				/	Supprimer un film enregistré
-/salles/:id								x				/	Supprimer une salle
-/seance/:id								x				/	Supprimer une scéance
+@Put :
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@Delete :
+/films/:id								❌				/	Supprimer un film enregistré
+/rooms/:id								❌				/	Supprimer une salle
+/sessions/:id								❌				/	Supprimer une scéance
 /users/:id								Supprimer son compte		/	Supprimer un utilisateur
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Filtres Globaux:
-- ?start_time='timestamp'&end_time='timestamps'
- => Renvoi toutes les séances qui débutent entre les deux timestamps
- => Renvoi tous les films qui sortent entre les deux timestamps
- => Renvoi tous les users inscrits entre les deux timestamps
+Filter Films:
+- ?start_time="timestamps"
+- ?end_time="timestamps"
+- ?film="titre du film"
+
+ 
+Filter rooms :
+- ?disabily_access=true
+- ?film="titre du film"
+- ?date="timestamps"
