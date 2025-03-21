@@ -1,0 +1,33 @@
+Routes
+@Get
+/films
+/films/:id
+/salles
+/salles/:id
+/salles/:id/seances (liste les scéances dans la salle)
+/seances
+/seances/:id
+/users
+/users/:id
+
+@Post
+/films
+/salles
+/seances
+/users
+
+@Put
+/films/:id
+/salles/:id
+/seances/:id
+/users/:id
+
+@Delete
+/films/:id
+/salles/:id
+/seance/:id
+/users/:id
+
+
+Filtres Globaux:
+?start_time='timestamp'&end_time='timestamps'
