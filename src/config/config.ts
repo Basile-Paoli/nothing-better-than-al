@@ -1,13 +1,27 @@
+import dotenv from 'dotenv'
+
+
 interface Config {
-	databaseHost: string
+	databaseURL: string
+	jwtSalt: string
+	passwordSalt: string
 }
 
-const {DB_HOST: databaseHost} = process.env;
+dotenv.config()
 
-if (!databaseHost) {
-	throw new Error('Missing database host');
+const {
+	DB_URL: databaseURL,
+	JWT_SALT: jwtSalt,
+	PASSWORD_SALT: passwordSalt
+} = process.env;
+
+if (!databaseURL || !jwtSalt || !passwordSalt) {
+	throw new Error('Missing environment variables')
 }
 
 export const config = {
-	databaseHost,
+	databaseURL,
+	jwtSalt,
+	passwordSalt
 } as const satisfies Config
+
