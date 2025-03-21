@@ -1,33 +1,49 @@
-Routes
+Routes								User					/	Admin
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
 @Get
-/films
-/films/:id
-/salles
-/salles/:id
-/salles/:id/seances (liste les scéances dans la salle)
-/seances
-/seances/:id
-/users
-/users/:id
+/billets						Voir tous mes billets 				/ 	x
+/films							Voir tous les films disponibles cette semaine 	/ 	Voir tous les films
+/films/:id						Voir un film par son id				/ 	Voir un film par son id
+/salles							Voir toutes les salles et leur disponibilité	/	Voir tous les salles
+/salles/:id						Voir une salle par son id			/	Voir une salle par son id
+/salles/:id/seances					Voir les scéances de la salle			/	Voir les scéances de la salle
+/seances						Voir toutes les scéances			/	Voir toutes les scéances
+/seances/:id						Voir une scéance avec son id			/ 	Voir une séance par son id
+/users									x				/	Voir tous les users
+/users/:id						Voir mon compte					/	Voir un compte utilisateur
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Post
-/films
-/salles
-/seances
-/users
+/films									x				/	Enregistrer un film
+/salles									x				/ 	Enregistrer une salle
+/seances								x				/ 	Ajouter une scéance
+/users									Créer son compte		/		x
+/billet									Acheter un billet		/	Acheter un billet pour moi
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Put
-/films/:id
-/salles/:id
-/seances/:id
-/users/:id
+/films/:id								x				/	Update un Film
+/salles/:id								x				/ 	Update une salle
+/seances/:id								x				/ 	Update une scéance
+/users/:id								Update son compte		/	Update un utilisateur
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Delete
-/films/:id
-/salles/:id
-/seance/:id
-/users/:id
+/films/:id								x				/	Supprimer un film enregistré
+/salles/:id								x				/	Supprimer une salle
+/seance/:id								x				/	Supprimer une scéance
+/users/:id								Supprimer son compte		/	Supprimer un utilisateur
 
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Filtres Globaux:
-?start_time='timestamp'&end_time='timestamps'
+- ?start_time='timestamp'&end_time='timestamps'
+ => Renvoi toutes les séances qui débutent entre les deux timestamps
+ => Renvoi tous les films qui sortent entre les deux timestamps
+ => Renvoi tous les users inscrits entre les deux timestamps
