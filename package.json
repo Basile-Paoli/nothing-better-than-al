@@ -6,7 +6,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "dev": "tsx --watch src/main.ts"
+    "dev": "tsx --watch src/main.ts",
+    "lint:ci": "eslint",
+    "lint": "eslint --fix"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
