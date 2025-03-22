@@ -1,8 +1,9 @@
 import {Authorized, Body, BodyParam, CurrentUser, Get, JsonController, Post} from "routing-controllers";
-import {zLoginParams, zRegisterParams} from "../validators/auth";
-import {loginUser, refreshToken} from "../services/auth/login";
-import {registerUser} from "../services/auth/register";
-import type {User} from "../db/schema/user";
+import {zLoginParams, zRegisterParams} from "@/validators/auth";
+import {loginUser, refreshToken} from "@/services/auth/login";
+import {registerUser} from "@/services/auth/register";
+import type {User} from "@/db/schema";
+import {logout} from "@/services/auth/logout";
 
 @JsonController('/auth')
 export class AuthController {
@@ -42,9 +43,9 @@ export class AuthController {
 		return await refreshToken(token)
 	}
 
-	@Get('/test')
+	@Get('/logout')
 	@Authorized()
-	test(@CurrentUser() user: User) {
-		return `Hello ${user.email}`
+	async logout(@CurrentUser() user: User): Promise<void> {
+		await logout(user)
 	}
 }

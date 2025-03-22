@@ -10,19 +10,20 @@ export class ErrorHandler implements ExpressErrorMiddlewareInterface {
 			response.status(400).send(formatZodError(error))
 			return
 		}
-		console.error(error);
-
 		if (error instanceof HttpError) {
 			response.status(error.httpCode).send({message: error.message})
 			return
 		}
+		console.error(error);
 		response.status(500).send({message: 'Internal server error'})
 	}
 }
 
 function formatZodError(error: ZodError) {
-	return error.issues.reduce<Record<string, string>>((acc, issue) => {
-		acc[issue.path.join('.')] = issue.message
-		return acc
-	}, {})
+	const response: Record<string, string> = {}
+	for (const issue of error.issues) {
+		const key = issue.path.join('.')
+		response[key] = issue.message
+	}
+	return response
 }

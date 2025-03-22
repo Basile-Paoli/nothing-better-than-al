@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
     "target": "es2016",
     "module": "commonjs",
     "esModuleInterop": true,
@@ -10,5 +15,7 @@
     "skipLibCheck": true,
     "outDir": "dist"
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

@@ -1,4 +1,6 @@
 import {pgEnum, pgTable, serial, varchar} from "drizzle-orm/pg-core";
+import {relations} from "drizzle-orm";
+import {tokenTable} from "./token";
 
 export const roleEnum = pgEnum('role', ['admin', 'customer']);
 
@@ -8,5 +10,9 @@ export const userTable = pgTable('user', {
 	password: varchar({length: 120}).notNull(),
 	role: roleEnum().notNull()
 })
+
+export const userRelations = relations(userTable, ({many}) => ({
+	tokens: many(tokenTable)
+}))
 
 export type User = typeof userTable.$inferSelect;

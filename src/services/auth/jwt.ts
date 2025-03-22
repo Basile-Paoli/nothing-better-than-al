@@ -37,6 +37,7 @@ export async function generateToken({userId, role, type}: { userId: User['id'], 
 
 	await db.insert(tokenTable).values({
 		token,
+		userId,
 	}).execute()
 
 	return token;
