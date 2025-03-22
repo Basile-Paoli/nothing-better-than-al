@@ -21,10 +21,10 @@ jobs:
       - run: npm ci
       - run: cp .env.testing .env
       - run: docker compose -f docker-compose.yml --env-file .env.testing up -d
-      - run: npx drizzle-kit push
-      - run: npx tsx ./test/populate-db.ts
       - run: npm run build
       - run: npm run start &
+      - run: npx drizzle-kit push
+      - run: npx tsx ./test/populate-db.ts
       - run: npm run test
 
 
