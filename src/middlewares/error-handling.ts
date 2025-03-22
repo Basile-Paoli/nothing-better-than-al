@@ -10,6 +10,7 @@ export class ErrorHandler implements ExpressErrorMiddlewareInterface {
 			response.status(400).send(formatZodError(error))
 			return
 		}
+		console.error(error);
 
 		if (error instanceof HttpError) {
 			response.status(error.httpCode).send({message: error.message})

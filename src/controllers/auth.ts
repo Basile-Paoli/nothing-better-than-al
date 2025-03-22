@@ -1,23 +1,50 @@
-import {Body, JsonController, Post} from "routing-controllers";
-import {zLoginValidator, zRegisterValidator} from "../validators/auth";
-import {loginUser, registerUser} from "../services/auth/login";
+import {Authorized, Body, BodyParam, CurrentUser, Get, JsonController, Post} from "routing-controllers";
+import {zLoginParams, zRegisterParams} from "../validators/auth";
+import {loginUser, refreshToken} from "../services/auth/login";
+import {registerUser} from "../services/auth/register";
+import type {User} from "../db/schema/user";
 
 @JsonController('/auth')
 export class AuthController {
 
 	@Post('/login')
-	async login(@Body() body: unknown) {
-		const loginParams = zLoginValidator.parse(body)
+	async login(
+		@Body() body: unknown
+	): Promise<{
+		accessToken: string
+		refreshToken: string
+	}> {
+		const loginParams = zLoginParams.parse(body)
 
-		const token = await loginUser(loginParams)
-		return {token}
+		const {refreshToken, accessToken} = await loginUser(loginParams)
+		return {accessToken, refreshToken}
 	}
 
 	@Post('/register')
-	async register(@Body() body: unknown) {
-		const registerParams = zRegisterValidator.parse(body)
-		const token = await registerUser(registerParams)
+	async register(
+		@Body() body: unknown
+	): Promise<{
+		accessToken: string
+		refreshToken: string
+	}> {
+		const registerParams = zRegisterParams.parse(body)
+		const {accessToken, refreshToken} = await registerUser(registerParams)
 
-		return {token}
+		return {accessToken, refreshToken}
+	}
+
+	@Post('/refresh')
+	async refresh(
+		@BodyParam('refreshToken', {type: String}) token: string
+	): Promise<{
+		accessToken: string
+	}> {
+		return await refreshToken(token)
+	}
+
+	@Get('/test')
+	@Authorized()
+	test(@CurrentUser() user: User) {
+		return `Hello ${user.email}`
 	}
 }
