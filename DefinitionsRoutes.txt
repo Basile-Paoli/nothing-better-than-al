@@ -11,11 +11,11 @@ Routes								User					/	Admin
 /account/ticket						Voir tous mes billets				/		✅
 /films							Voir tous les films disponibles cette semaine 	/ 	Voir tous les films
 /films/:id						Voir un film par son id				/ 		✅
-/rooms							Voir toutes les rooms et leur disponibilité	/		✅
-/rooms/:id						Voir une salle par son id			/		✅
-/rooms/:id/sessions					Voir les scéances de la salle			/		✅
-/sessions						Voir toutes les scéances			/		✅
-/sessions/:id						Voir une scéance avec son id			/ 		✅
+/screens							Voir toutes les rooms et leur disponibilité	/		✅
+/screens/:id						Voir une salle par son id			/		✅
+/screens/:id/sessions					Voir les séances de la salle			/		✅
+/screenings						Voir toutes les séances			/		✅
+/screenings/:id						Voir une séance avec son id			/ 		✅
 /users									❌				/	Voir tous les users
 /users/:id								❌				/	Voir un compte utilisateur
 
@@ -26,8 +26,8 @@ Routes								User					/	Admin
 /account/ticket							Acheter un billet			/		✅
 /films									❌				/	Enregistrer un film
 /rooms									❌				/ 	Enregistrer une salle
-/sessions								❌				/ 	Ajouter une scéance
-/sessions/:id/reservation					Réserver la séance par son id		/		✅
+/screenings								❌				/ 	Ajouter une scéance
+/screenings/:id/reservation					Réserver la séance par son id		/		✅
 /users								Créer son compte			/		❌
 /ticket								Acheter un billet			/		✅
 
@@ -36,9 +36,9 @@ Routes								User					/	Admin
 @Patch :
 /account/balance						Ajouter de l'argent			/		✅
 /films/:id								❌				/	Update un Film
-/rooms/:id								❌				/ 	Update une salle
-/sessions/:id/update							❌				/ 	Update une scéance
-/sessions/:id/cancel						Annuler une réservation			/		✅
+/screens/:id								❌				/ 	Update une salle
+/screenings/:id/update							❌				/ 	Update une séance
+/screenings/:id/cancel						Annuler une réservation			/		✅
 /users/:id/update						Update infos son compte			/		✅
 /users/:id/promote							❌				/	Promote un user to admin
 
@@ -51,8 +51,8 @@ Routes								User					/	Admin
 
 @Delete :
 /films/:id								❌				/	Supprimer un film enregistré
-/rooms/:id								❌				/	Supprimer une salle
-/sessions/:id								❌				/	Supprimer une scéance
+/screens/:id								❌				/	Supprimer une salle
+/sessions/:id								❌				/	Supprimer une séance
 /users/:id								Supprimer son compte		/	Supprimer un utilisateur
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------

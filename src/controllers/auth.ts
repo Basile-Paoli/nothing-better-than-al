@@ -1,9 +1,9 @@
 import {Authorized, Body, BodyParam, CurrentUser, Get, JsonController, Post} from "routing-controllers";
-import {zLoginParams, zRegisterParams} from "@/validators/auth";
-import {loginUser, refreshToken} from "@/services/auth/login";
-import {registerUser} from "@/services/auth/register";
-import type {User} from "@/db/schema";
-import {logout} from "@/services/auth/logout";
+import {zLoginParams, zRegisterParams} from "../validators/auth";
+import {loginUser, refreshToken} from "../services/auth/login";
+import {registerUser} from "../services/auth/register";
+import type {User} from "../db/schema";
+import {logout} from "../services/auth/logout";
 
 @JsonController('/auth')
 export class AuthController {
