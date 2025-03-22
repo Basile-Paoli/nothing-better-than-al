@@ -11,4 +11,16 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run lint:ci
-  
+
+  test:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v4.3.0
+      - run: npm ci
+      - run: docker compose -f docker-compose.yml --env-file .env.testing up -d
+      - run: npx tsx ./test/populate-db.ts
+      - run: npm run test
+
+
