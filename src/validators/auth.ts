@@ -13,3 +13,8 @@ export const zRegisterParams = z.object({
 })
 
 export type RegisterParams = z.infer<typeof zRegisterParams>;
+
+export const zTokens = z.object({
+	accessToken: z.string(),
+	refreshToken: z.string()
+})

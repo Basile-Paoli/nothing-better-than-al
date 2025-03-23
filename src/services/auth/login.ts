@@ -1,13 +1,15 @@
 import type {LoginParams} from "../../validators/auth";
-import {userTable} from "../../db/schema/user";
+import {tokenTable, userTable} from "../../db/schema";
 import {db} from "../../db/database";
 import {eq} from "drizzle-orm";
 import {BadRequestError} from "routing-controllers";
 import {decodeJwt, generateToken, type JwtPayload, JwtType} from "./jwt";
 import {hashPassword} from "./password";
-import {tokenTable} from "../../db/schema/token";
 
-export async function loginUser(params: LoginParams) {
+export async function loginUser(params: LoginParams): Promise<{
+	accessToken: string;
+	refreshToken: string
+}> {
 	const userQuery = await db.select().from(userTable).where(eq(userTable.email, params.email)).execute()
 	const user = userQuery[0]
 
@@ -37,7 +39,7 @@ export async function loginUser(params: LoginParams) {
 }
 
 
-export async function refreshToken(token: string) {
+export async function refreshToken(token: string): Promise<string> {
 	const dbToken = await db.select().from(tokenTable).where(eq(tokenTable.token, token)).execute()
 	if (!dbToken[0]) {
 		throw new BadRequestError('Invalid token')
@@ -54,13 +56,10 @@ export async function refreshToken(token: string) {
 		throw new BadRequestError('Invalid token')
 	}
 
-	const accessToken = await generateToken({
+	return generateToken({
 		userId: payload.userId,
 		role: payload.role,
 		type: JwtType.AccessToken
 	})
 
-	return {
-		accessToken
-	}
 }

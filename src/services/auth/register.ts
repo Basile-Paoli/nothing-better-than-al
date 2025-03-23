@@ -2,24 +2,28 @@ import type {RegisterParams} from "../../validators/auth";
 import {generateToken, JwtType} from "./jwt";
 import {hashPassword} from "./password";
 import {db} from "../../db/database";
-import {userTable} from "../../db/schema/user";
+import {type User, userTable} from "../../db/schema";
 import {DatabaseError} from "pg";
 import {BadRequestError} from "routing-controllers";
 
-export async function registerUser(params: RegisterParams) {
+export async function registerUser(params: RegisterParams): Promise<{
+	accessToken: string
+	refreshToken: string
+}> {
 	const user = await saveUser(params);
 
-	const accessToken =await  generateToken({
-		userId: user.id,
-		role: user.role,
-		type: JwtType.AccessToken
-	})
-
-	const refreshToken = await generateToken({
-		userId: user.id,
-		role: user.role,
-		type: JwtType.RefreshToken
-	})
+	const [accessToken, refreshToken] = await Promise.all([
+		generateToken({
+			userId: user.id,
+			role: user.role,
+			type: JwtType.AccessToken
+		}),
+		generateToken({
+			userId: user.id,
+			role: user.role,
+			type: JwtType.RefreshToken
+		})
+	])
 
 	return {
 		accessToken,
@@ -27,7 +31,7 @@ export async function registerUser(params: RegisterParams) {
 	}
 }
 
-async function saveUser(params: RegisterParams) {
+async function saveUser(params: RegisterParams): Promise<User> {
 	const hashedPassword = await hashPassword(params.password)
 	try {
 		const userResult = await db
@@ -37,10 +41,8 @@ async function saveUser(params: RegisterParams) {
 				password: hashedPassword,
 				role: 'customer'
 			})
-			.returning({
-				id: userTable.id,
-				role: userTable.role
-			}).execute()
+			.returning()
+			.execute()
 		return userResult[0];
 	} catch (e) {
 		if (e instanceof DatabaseError && e.code === '23505') {

@@ -1,20 +1,29 @@
-import {createExpressServer} from "routing-controllers";
+import {createExpressServer, getMetadataArgsStorage, type RoutingControllersOptions} from "routing-controllers";
+import "zod-openapi/extend"
 import "reflect-metadata"
 import {authMiddleware, getCurrentUser} from "./middlewares/auth";
 
 import {ErrorHandler} from "./middlewares/error-handling";
-import * as path from "node:path";
+import {routingControllersToSpec} from "routing-controllers-openapi";
+import swaggerUi from "swagger-ui-express";
+import {UserController} from "./controllers/user";
+import {AuthController} from "./controllers/auth";
 
 const port = 3000
 
 
-const app = createExpressServer({
+const routingControllerOptions: RoutingControllersOptions = {
 	authorizationChecker: authMiddleware,
 	currentUserChecker: getCurrentUser,
 	middlewares: [ErrorHandler],
-	controllers: [path.join(__dirname + "/controllers/*.ts"), path.join(__dirname + "/controllers/*.js")],
+	controllers: [UserController, AuthController],
 	defaultErrorHandler: false
-})
+}
+const app = createExpressServer(routingControllerOptions);
+
+const storage = getMetadataArgsStorage()
+const spec = routingControllersToSpec(storage, routingControllerOptions)
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(spec));
 
 app.listen(port, () => {
 	console.log(`Server running on port ${port}`)

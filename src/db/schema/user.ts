@@ -1,5 +1,5 @@
 import {pgEnum, pgTable, serial, varchar} from "drizzle-orm/pg-core";
-import {type InferSelectModel, relations} from "drizzle-orm";
+import {getTableColumns, type InferSelectModel, relations} from "drizzle-orm";
 import {tokenTable} from "./token";
 
 export const roleEnum = pgEnum('role', ['admin', 'customer']);
@@ -18,12 +18,8 @@ export const userRelations = relations(userTable, ({many}) => ({
 
 type UserTable = typeof userTable;
 
-export const userPublicColumns = {
-	id: userTable.id,
-	email: userTable.email,
-	role: userTable.role,
-} as const satisfies Omit<UserTable['_']['columns'], 'password'>
+const {password, ...rest} = getTableColumns(userTable)
+export const userPublicColumns = rest satisfies Omit<UserTable['_']['columns'], 'password'>
 
 export type User = InferSelectModel<UserTable>
-
 export type PublicUser = Omit<User, 'password'>;

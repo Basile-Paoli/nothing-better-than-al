@@ -12,6 +12,7 @@ export default tseslint.config({
 		'unused-imports': unusedImports
 	},
 	rules: {
+		'@typescript-eslint/no-unused-vars': ['error', {ignoreRestSiblings: true}],
 		'unused-imports/no-unused-imports': 'error',
 	},
 })

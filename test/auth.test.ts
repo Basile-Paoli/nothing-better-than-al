@@ -1,4 +1,4 @@
-import {adminClient, customerUser, loginAdmin} from "./clients";
+import {adminClient, customerUser, loginCustomer} from "./clients";
 import axios from "axios";
 
 describe('register', () => {
@@ -47,3 +47,15 @@ describe('login', () => {
 		expect(res.data).toHaveProperty('refreshToken')
 	})
 })
+
+describe('refresh', () => {
+	it('refresh the access token', async () => {
+		const {refreshToken} = await loginCustomer()
+
+		const res = await axios.post("auth/refresh", {
+			refreshToken
+		})
+
+		expect(res.data).toHaveProperty('accessToken')
+	})
+});

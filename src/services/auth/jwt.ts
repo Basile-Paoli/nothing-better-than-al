@@ -28,7 +28,13 @@ function encodeJwt(payload: JwtPayload): string {
 	return jwt.sign(payload, config.jwtSalt, {expiresIn})
 }
 
-export async function generateToken({userId, role, type}: { userId: User['id'], role: User['role'], type: JwtType }) {
+export async function generateToken(
+	{userId, role, type}: {
+		userId: User['id'],
+		role: User['role'],
+		type: JwtType
+	}
+): Promise<string> {
 	const token = encodeJwt({
 		userId,
 		role,

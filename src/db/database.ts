@@ -5,5 +5,6 @@ import {config} from "../config/config";
 
 export const db = drizzle(config.databaseURL, {
 	casing: 'snake_case',
-	schema
+	schema,
+	logger: true
 });

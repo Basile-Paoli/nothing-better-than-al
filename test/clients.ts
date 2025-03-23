@@ -9,8 +9,8 @@ axios.defaults.baseURL = 'http://localhost:3000/';
 export const adminClient = axios.create()
 adminClient.interceptors.request.use(
 	async (config) => {
-		const data = await loginAdmin()
-		config.headers.authorization = `Bearer ${data.accessToken}`
+		const {accessToken} = await loginAdmin()
+		config.headers.authorization = `Bearer ${accessToken}`
 		return config
 	}
 )
@@ -18,8 +18,8 @@ adminClient.interceptors.request.use(
 export async function loginAdmin() {
 	const res = await axios.post('auth/login', adminUser)
 	return {
-		accessToken: res.data.accessToken,
-		refreshToken: res.data.refreshToken
+		accessToken: res.data.accessToken as string,
+		refreshToken: res.data.refreshToken as string
 	}
 }
 
@@ -32,8 +32,8 @@ export const customerUser = {
 export const customerClient = axios.create()
 customerClient.interceptors.request.use(
 	async (config) => {
-		const data = await loginCustomer()
-		config.headers.authorization = `Bearer ${data.accessToken}`
+		const {accessToken} = await loginCustomer()
+		config.headers.authorization = `Bearer ${accessToken}`
 		return config
 	}
 )
@@ -41,7 +41,7 @@ customerClient.interceptors.request.use(
 export async function loginCustomer() {
 	const res = await axios.post('auth/login', customerUser)
 	return {
-		accessToken: res.data.accessToken,
-		refreshToken: res.data.refreshToken
+		accessToken: res.data.accessToken as string,
+		refreshToken: res.data.refreshToken as string
 	}
 }
