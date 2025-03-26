@@ -28,7 +28,6 @@ Routes								User					/	Admin
 /rooms									❌				/ 	Enregistrer une salle
 /screenings								❌				/ 	Ajouter une scéance
 /screenings/:id/reservation					Réserver la séance par son id		/		✅
-/users								Créer son compte			/		❌
 /ticket								Acheter un billet			/		✅
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------

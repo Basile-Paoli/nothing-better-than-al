@@ -10,8 +10,8 @@ export const zListUsersParams = z.object({
 export type ListUsersParams = z.infer<typeof zListUsersParams>
 
 export const zPublicUser = z.object({
-	id: z.number().int(),
-	email: z.string().email(),
+	id: z.number().int().openapi({example: 1}),
+	email: z.string().email().openapi({example: 'email@example.com'}),
 	role: zUserRole
 })
 
