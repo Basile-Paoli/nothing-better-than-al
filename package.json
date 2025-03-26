@@ -34,6 +34,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/pg": "^8.11.11",
     "@types/swagger-ui-express": "^4.1.8",
+    "conditional-type-checks": "^1.0.6",
     "drizzle-kit": "^0.30.5",
     "eslint": "^9.23.0",
     "eslint-plugin-unused-imports": "^4.1.4",

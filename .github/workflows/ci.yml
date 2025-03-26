@@ -23,8 +23,7 @@ jobs:
       - run: docker compose -f docker-compose.yml --env-file .env.testing up -d
       - run: npm run build
       - run: npm run start &
-      - run: npx drizzle-kit push
-      - run: npx tsx ./test/populate-db.ts
+      - run: npm run prepare-test
       - run: npm run test
 
 
