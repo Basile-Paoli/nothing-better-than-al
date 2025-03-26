@@ -10,8 +10,7 @@ export async function loginUser(params: LoginParams): Promise<{
 	accessToken: string;
 	refreshToken: string
 }> {
-	const userQuery = await db.select().from(userTable).where(eq(userTable.email, params.email)).execute()
-	const user = userQuery[0]
+	const [user] = await db.select().from(userTable).where(eq(userTable.email, params.email))
 
 	const hashedPassword = await hashPassword(params.password)
 	if (!user || user.password !== hashedPassword) {
@@ -40,8 +39,8 @@ export async function loginUser(params: LoginParams): Promise<{
 
 
 export async function refreshToken(token: string): Promise<string> {
-	const dbToken = await db.select().from(tokenTable).where(eq(tokenTable.token, token)).execute()
-	if (!dbToken[0]) {
+	const [dbToken] = await db.select().from(tokenTable).where(eq(tokenTable.token, token))
+	if (!dbToken) {
 		throw new BadRequestError('Invalid token')
 	}
 

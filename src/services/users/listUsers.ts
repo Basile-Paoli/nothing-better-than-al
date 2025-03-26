@@ -10,5 +10,5 @@ export function getUsers(listUsersParams: ListUsersParams): Promise<PublicUser[]
 		query = query.where(eq(userTable.role, listUsersParams.role))
 	}
 
-	return query.execute()
+	return query
 }

@@ -56,7 +56,7 @@ describe('Movies API', () => {
 		});
 	});
 
-	describe('PUT /movies/:id', () => {
+	describe('PATCH /movies/:id', () => {
 		it('should allow admin to update a movie', async () => {
 			const updatedMovie = {
 				...testMovie,

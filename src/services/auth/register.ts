@@ -34,7 +34,7 @@ export async function registerUser(params: RegisterParams): Promise<{
 async function saveUser(params: RegisterParams): Promise<User> {
 	const hashedPassword = await hashPassword(params.password)
 	try {
-		const userResult = await db
+		const [user] = await db
 			.insert(userTable)
 			.values({
 				email: params.email,
@@ -42,8 +42,7 @@ async function saveUser(params: RegisterParams): Promise<User> {
 				role: 'customer'
 			})
 			.returning()
-			.execute()
-		return userResult[0];
+		return user!
 	} catch (e) {
 		if (e instanceof DatabaseError && e.code === '23505') {
 			throw new BadRequestError('Email already exists')

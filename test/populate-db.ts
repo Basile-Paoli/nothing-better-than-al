@@ -15,7 +15,7 @@ async function populate() {
 			password: await hashPassword(customerUser.password),
 			role: 'customer'
 		}
-	]).execute()
+	])
 }
 
 populate()

@@ -9,7 +9,7 @@ export async function createMovie(params: CreateMovieParams): Promise<Movie> {
 		.values(params)
 		.returning();
 
-	return movie;
+	return movie!;
 }
 
 export async function updateMovie(id: number, params: UpdateMovieParams) {
@@ -40,8 +40,7 @@ export async function getMovies(): Promise<Movie[]> {
 export async function getMovieById(id: number): Promise<Movie> {
 	const [movie] = await db.select()
 		.from(movieTable)
-		.where(eq(movieTable.id, id))
-		.limit(1);
+		.where(eq(movieTable.id, id));
 
 	if (!movie) {
 		throw new NotFoundError('Movie not found');

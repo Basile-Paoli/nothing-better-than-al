@@ -44,7 +44,7 @@ export async function generateToken(
 	await db.insert(tokenTable).values({
 		token,
 		userId,
-	}).execute()
+	})
 
 	return token;
 }

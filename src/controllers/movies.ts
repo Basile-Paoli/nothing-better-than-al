@@ -29,11 +29,7 @@ export class MovieController {
 	@ResponseBody(200, zMovie)
 	async getMovie(@Param('id') id: string): Promise<Movie> {
 		const validatedId = zId.parse(id);
-		const movie = await getMovieById(validatedId);
-		if (!movie) {
-			throw new Error('Movie not found');
-		}
-		return movie;
+		return await getMovieById(validatedId);
 	}
 
 	@Post('/')
