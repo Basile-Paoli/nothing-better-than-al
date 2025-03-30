@@ -1,5 +1,5 @@
 import {pgEnum, pgTable, serial, varchar, text, integer, boolean} from "drizzle-orm/pg-core";
-import {relations} from "drizzle-orm";
+import {type InferSelectModel, relations} from "drizzle-orm";
 import {screeningTable} from "./session";
 
 export const typeEnum = pgEnum('type', ['3D', '2D', '4DX']);
@@ -17,3 +17,5 @@ export const screenTable = pgTable('screen', {
 export const screenRelations = relations(screenTable, ({many}) => ({
 	sessions: many(screeningTable)
 }))
+
+export type Screen = InferSelectModel<typeof screenTable>

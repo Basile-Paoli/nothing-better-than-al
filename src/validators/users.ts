@@ -1,8 +1,8 @@
 import {z} from "zod";
-import type {PublicUser} from "../db/schema";
+import {type PublicUser, roleEnum} from "../db/schema";
 import type {AssertTrue, IsExact} from "conditional-type-checks";
 
-const zUserRole = z.enum(['admin', 'customer'])
+const zUserRole = z.enum(roleEnum.enumValues)
 export const zListUsersParams = z.object({
 	role: zUserRole.optional()
 })
