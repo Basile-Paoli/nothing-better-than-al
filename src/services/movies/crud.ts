@@ -63,11 +63,13 @@ export async function getMyMovies(id_user: number): Promise<MoviesSeen> {
         .where(eq(moviesSeenTable.userId, id_user));
 
     if (movies.length === 0) {
-        throw new NotFoundError('No movies found for this user');
+		var movie_seen: MoviesSeen = []
+		return movie_seen
     }
 
     if (movies.length === 0) {
-        throw new NotFoundError('No movies found for this user');
+        var movie_seen: MoviesSeen = []
+		return movie_seen
     }
 
     return movies.map((record) => ({
