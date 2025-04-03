@@ -9,6 +9,7 @@ import swaggerUi from "swagger-ui-express";
 import {UserController} from "./controllers/user";
 import {AuthController} from "./controllers/auth";
 import {MovieController} from "./controllers/movies";
+import {AccountController} from "./controllers/accounts";
 
 const port = 3000
 
@@ -17,7 +18,7 @@ const routingControllerOptions: RoutingControllersOptions = {
 	authorizationChecker: authMiddleware,
 	currentUserChecker: getCurrentUser,
 	middlewares: [ErrorHandler],
-	controllers: [UserController, AuthController, MovieController],
+	controllers: [UserController, AuthController, MovieController, AccountController],
 	defaultErrorHandler: false
 }
 const app = createExpressServer(routingControllerOptions);
