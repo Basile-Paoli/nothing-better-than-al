@@ -4,7 +4,7 @@ import { ticketTable } from "../../db/schema/tickets";
 import { CreateTicketParam, MyTicket, Ticket, zCreateTicketParams} from "../../validators/tickets";
 
 
-export async function getTicketsByUserId(user_id: number): Promise<Ticket[] | null>{
+export async function getTicketsByUserId(user_id: number): Promise<Ticket[]>{
     const validTickets = await db
     .select()
     .from(ticketTable)
@@ -12,20 +12,24 @@ export async function getTicketsByUserId(user_id: number): Promise<Ticket[] | nu
       eq(ticketTable.userId, user_id)
     );
     if (!validTickets || validTickets.length === 0) {
-        return null;
+        var tic: Ticket[] = []
+        return tic;
     }
     return validTickets as Ticket[]
 }
 
-export async function getTicketsById(ticket_id: number): Promise<Ticket | null>{
+export async function getTicketsById(ticket_id: number, user_id: number): Promise<Ticket>{
     const validTickets = await db
     .select()
     .from(ticketTable)
     .where(
-      eq(ticketTable.id, ticket_id)
+      and(
+        eq(ticketTable.userId, user_id),
+        lt(ticketTable.used, ticketTable.max_usage)
+      )
     );
     if (!validTickets || validTickets.length === 0) {
-        return null;
+        throw new Error("This ticket don't exist.")
     }
     return validTickets[0] as Ticket
 }  
@@ -84,8 +88,8 @@ export async function createTicket(ticket: CreateTicketParam, user_id: number): 
 }
 
 
-export async function incrementUsedByOne(ticket_id: number): Promise<Ticket | undefined> {
-    const ticket = await getTicketsById(ticket_id);
+export async function incrementUsedByOne(ticket_id: number, user_id: number): Promise<Ticket | undefined> {
+    const ticket = await getTicketsById(ticket_id, user_id);
   
     if (!ticket) {
       throw new Error("Le ticket spécifié n'existe pas.");
