@@ -13,7 +13,7 @@ export async function getTicketsByUserId(user_id: number): Promise<Ticket[] | nu
       eq(ticketTable.userId, user_id)
     );
     if (!validTickets || validTickets.length === 0) {
-      throw new TicketError("Ce Ticket n'existe pas")
+      throw new TicketError("Ce Ticket n'existe pas", 404)
     }
     return validTickets as Ticket[]
 }
@@ -24,18 +24,18 @@ export async function getTicketsById(ticket_id: number, user_id: number): Promis
     .from(ticketTable)
     .where(
       and(
-        eq(ticketTable.userId, user_id),
-        lt(ticketTable.id, ticket_id)
+        //eq(ticketTable.userId, user_id),
+        eq(ticketTable.id, ticket_id)
       )
     );
-
+    console.log(validTickets, ticket_id)
     if (!validTickets || validTickets.length === 0) {
-      throw new TicketError("Le Ticket n'existe pas")
+      throw new TicketError("Le Ticket n'existe pas1", 404)
     }
     return validTickets[0] as Ticket
 }  
 
-export async function getMyValidTickets(user_id: number): Promise<MyTicket | null> {
+export async function getMyValidTickets(user_id: number): Promise<MyTicket[] | null> {
 
     const validTickets = await db.select()
       .from(ticketTable)
@@ -45,26 +45,26 @@ export async function getMyValidTickets(user_id: number): Promise<MyTicket | nul
           lt(ticketTable.used, ticketTable.max_usage)
         )
       )
-      .limit(1)
 
     if (!validTickets || validTickets.length == 0) {
-      throw new TicketError("Ce Ticket n'existe pas")
+      throw new TicketError("Il n'y a pas de ticket valide", 404)
     }
 
     const validTicket = validTickets[0];
 
     if (!validTicket) {
-      throw new TicketError("Ticket non valide")
+      throw new TicketError("Ticket non valide", 403)
       }
     
-    const myTicket: MyTicket = {
-        id: validTicket.id,
-        max_usage: validTicket.max_usage,
-        used: validTicket.used,
-        type: validTicket.type,
-        buy_date: validTicket.buy_date
-    }
-    return myTicket
+    const myTickets: MyTicket[] = validTickets.map((validTicket) => ({
+      id: validTicket.id,
+      max_usage: validTicket.max_usage,
+      used: validTicket.used,
+      type: validTicket.type,
+      buy_date: validTicket.buy_date,
+    }));
+    
+    return myTickets;
 }
 
 export async function createTicket(ticket: CreateTicketParam, user_id: number): Promise<Ticket | undefined> {
@@ -90,6 +90,7 @@ export async function createTicket(ticket: CreateTicketParam, user_id: number): 
 
 
 export async function incrementUsed(ticket_id: number, user_id: number, nb_increment: number): Promise<Ticket | undefined> {
+  console.log(ticket_id)
     const ticket = await getTicketsById(ticket_id, user_id);
   
     if (!ticket) {
@@ -110,7 +111,7 @@ export async function incrementUsed(ticket_id: number, user_id: number, nb_incre
       .returning();
 
     if (!updatedTicket || updatedTicket.length === 0) {
-      throw new TicketError("Échec de la mise à jour du ticket.", 500)
+      throw new TicketError("Échec de la mise à jour du ticket.")
     }
   
     return updatedTicket[0];

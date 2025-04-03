@@ -36,7 +36,7 @@ export class AccountController {
     @Get('/ticket/valid')
     @Authorized()
     @ResponseBody(200, z.array(zTicket))
-    async getValidTicket(@CurrentUser() user: PublicUser): Promise<MyTicket | null>{
+    async getValidTicket(@CurrentUser() user: PublicUser): Promise<MyTicket[] | null>{
         return getMyValidTickets(user.id)
     }
 
@@ -61,13 +61,13 @@ export class AccountController {
 
     // ---------------------------------------------------- //
 
-    @Patch('/ticket/update/:ticket_id')
+    @Patch('/ticket/update')
     @Authorized()
     @RequestBody(zUpdateTicketParams)
     @ResponseBody(200, z.array(zTicket))
-    async updateTicket(@CurrentUser() user: PublicUser, @QueryParam('ticket_id') ticket_id: number, @Body() body: unknown): Promise<MyTicket | undefined>{
+    async updateTicket(@CurrentUser() user: PublicUser, @Body() body: unknown): Promise<MyTicket | undefined>{
         const ticketParams = zUpdateTicketParams.parse(body)
-        return incrementUsed(ticket_id, user.id, ticketParams.nb_increment)
+        return incrementUsed(ticketParams.id, user.id, ticketParams.nb_increment)
     }
         
     @Patch('/balance')

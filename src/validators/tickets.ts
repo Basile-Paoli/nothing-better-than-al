@@ -16,6 +16,7 @@ export const zCreateTicketParams = z.object({
 })
 
 export const zUpdateTicketParams = z.object({
+    id: z.number().int().positive().openapi({example: 1}),
     nb_increment: z.number().int().positive().openapi({example: 1})
 })
 
