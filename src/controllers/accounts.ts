@@ -6,7 +6,7 @@ import { zMyAccount, zMyBalance, Account } from "../validators/accounts";
 import { MyTicket, Ticket, zCreateTicketParams, zUpdateTicketParams } from "../validators/tickets";
 import { zTicket} from "../validators/tickets";
 import { getAccountData } from "../services/accounts/crud";
-import { createTicket, getMyValidTickets, getTicketsById, getTicketsByUserId, incrementUsedByOne } from "../services/tickets/crud";
+import { createTicket, getMyValidTickets, getTicketsById, getTicketsByUserId, incrementUsed } from "../services/tickets/crud";
 
 @JsonController('/account')
 export class AccountController {
@@ -63,9 +63,11 @@ export class AccountController {
 
     @Patch('/ticket/update/:ticket_id')
     @Authorized()
+    @RequestBody(zUpdateTicketParams)
     @ResponseBody(200, z.array(zTicket))
-    async updateTicket(@CurrentUser() user: PublicUser, @QueryParam('ticket_id') ticket_id: number): Promise<MyTicket | undefined>{
-        return incrementUsedByOne(ticket_id, user.id)
+    async updateTicket(@CurrentUser() user: PublicUser, @QueryParam('ticket_id') ticket_id: number, @Body() body: unknown): Promise<MyTicket | undefined>{
+        const ticketParams = zUpdateTicketParams.parse(body)
+        return incrementUsed(ticket_id, user.id, ticketParams.nb_increment)
     }
         
     @Patch('/balance')

@@ -2,9 +2,10 @@ import { and, lt, eq } from "drizzle-orm";
 import { db } from "../../db/database";
 import { ticketTable } from "../../db/schema/tickets";
 import { CreateTicketParam, MyTicket, Ticket, zCreateTicketParams} from "../../validators/tickets";
+import { TicketError } from "../../errors/TicketsErrors";
 
 
-export async function getTicketsByUserId(user_id: number): Promise<Ticket[]>{
+export async function getTicketsByUserId(user_id: number): Promise<Ticket[] | null>{
     const validTickets = await db
     .select()
     .from(ticketTable)
@@ -12,24 +13,24 @@ export async function getTicketsByUserId(user_id: number): Promise<Ticket[]>{
       eq(ticketTable.userId, user_id)
     );
     if (!validTickets || validTickets.length === 0) {
-        var tic: Ticket[] = []
-        return tic;
+      throw new TicketError("Ce Ticket n'existe pas")
     }
     return validTickets as Ticket[]
 }
 
-export async function getTicketsById(ticket_id: number, user_id: number): Promise<Ticket>{
+export async function getTicketsById(ticket_id: number, user_id: number): Promise<Ticket | null>{
     const validTickets = await db
     .select()
     .from(ticketTable)
     .where(
       and(
         eq(ticketTable.userId, user_id),
-        lt(ticketTable.used, ticketTable.max_usage)
+        lt(ticketTable.id, ticket_id)
       )
     );
+
     if (!validTickets || validTickets.length === 0) {
-        throw new Error("This ticket don't exist.")
+      throw new TicketError("Le Ticket n'existe pas")
     }
     return validTickets[0] as Ticket
 }  
@@ -47,13 +48,13 @@ export async function getMyValidTickets(user_id: number): Promise<MyTicket | nul
       .limit(1)
 
     if (!validTickets || validTickets.length == 0) {
-      return null;
+      throw new TicketError("Ce Ticket n'existe pas")
     }
 
     const validTicket = validTickets[0];
 
     if (!validTicket) {
-        return null;
+      throw new TicketError("Ticket non valide")
       }
     
     const myTicket: MyTicket = {
@@ -81,31 +82,35 @@ export async function createTicket(ticket: CreateTicketParam, user_id: number): 
         .returning()
 
     if (!returnTicket) {
-        throw new Error("Échec de la création du ticket.");
+        throw new TicketError("Échec de la création du ticket.")
     }
 
     return returnTicket;
 }
 
 
-export async function incrementUsedByOne(ticket_id: number, user_id: number): Promise<Ticket | undefined> {
+export async function incrementUsed(ticket_id: number, user_id: number, nb_increment: number): Promise<Ticket | undefined> {
     const ticket = await getTicketsById(ticket_id, user_id);
   
     if (!ticket) {
-      throw new Error("Le ticket spécifié n'existe pas.");
+      throw new TicketError("Le ticket spécifié n'existe pas.", 404)
     }
   
     if (ticket.used == ticket.max_usage) {
-      throw new Error(`Ce ticket n'a plus d'utilisations disponible`);
+      throw new TicketError(`Ce ticket n'a plus d'utilisations disponible`, 403)
+    }
+
+    if(ticket.used + nb_increment > ticket.max_usage){
+      throw new TicketError(`Il n'y a pas assez de place disponible sur ce ticket`, 403)
     }
   
     const updatedTicket = await db.update(ticketTable)
-      .set({ used: ticket.used + 1 })
+      .set({ used: ticket.used + nb_increment })
       .where(eq(ticketTable.id, ticket_id))
       .returning();
 
     if (!updatedTicket || updatedTicket.length === 0) {
-    throw new Error("Échec de la mise à jour du ticket.");
+      throw new TicketError("Échec de la mise à jour du ticket.", 500)
     }
   
     return updatedTicket[0];

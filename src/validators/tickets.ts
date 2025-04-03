@@ -11,12 +11,12 @@ export const zTicket = z.object({
 
 export const zCreateTicketParams = z.object({
     type: z.enum(["super", "normal"]),
-    used: z.number().int().positive().nullable().openapi({example: 9}),
+    used: z.number().int().min(0).nullable().openapi({example: 9}),
     max_usage: z.number().int().positive().openapi({example: 10}),
 })
 
 export const zUpdateTicketParams = z.object({
-    id: z.number().int().positive().openapi({example: 1})
+    nb_increment: z.number().int().positive().openapi({example: 1})
 })
 
 export type Ticket = z.infer<typeof zTicket>;
