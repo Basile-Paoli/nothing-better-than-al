@@ -18,6 +18,7 @@ import type {Movie} from "../db/schema";
 import {zId} from "../validators/utils";
 
 @JsonController('/movies')
+@Authorized()
 export class MovieController {
 	@Get('/')
 	@ResponseBody(200, z.array(zMovie))

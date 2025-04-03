@@ -18,6 +18,7 @@ import type {Screen} from "../db/schema";
 import {zId} from "../validators/utils";
 
 @JsonController('/screens')
+@Authorized()
 export class ScreenController {
     @Get('/')
     @ResponseBody(200, z.array(zScreen))

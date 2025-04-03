@@ -1,5 +1,4 @@
-import {adminClient, customerClient, customerUser} from "./clients";
-import axios from "axios";
+import {adminClient, customerClient } from "./clients";
 
 describe('Movies API', () => {
 	const testMovie = {
