@@ -17,6 +17,12 @@ export class AccountController {
         return getAccountData(user)
     }
 
+    @Get('/balance')
+    @ResponseBody(200, z.array(zMyBalance))
+    async getBalance(@CurrentUser() user: PublicUser): Promise<Number>{
+        return 10
+    }
+
     // ---------------------------------------------------- //
 
     @Get('/ticket')
@@ -47,10 +53,18 @@ export class AccountController {
         const ticketParams = zCreateTicketParams.parse(body)
         return createTicket(ticketParams, user.id)
     }
+
+    // ---------------------------------------------------- //
+
     @Patch('/ticket/update/:ticket_id')
     @ResponseBody(200, z.array(zTicket))
     async updateTicket(@CurrentUser() user: PublicUser, @QueryParam('ticket_id') ticket_id: number): Promise<MyTicket | undefined>{
-        const ticket = incrementUsedByOne(ticket_id)
-        return ticket
+        return incrementUsedByOne(ticket_id)
+    }
+        
+    @Patch('/balance')
+    @ResponseBody(200, z.array(zTicket))
+    async depositMoney(@CurrentUser() user: PublicUser): Promise<boolean>{
+        return true
     }
 }
