@@ -9,12 +9,14 @@ Routes								User					/	Admin
 /account 						Voir mon compte					/		✅
 /account/balance					Voir l'argent sur mon compte			/		✅
 /account/ticket						Voir tous mes billets				/		✅
-/films							Voir tous les films disponibles cette semaine 	/ 	Voir tous les films
-/films/:id						Voir un film par son id				/ 		✅
-/screens							Voir toutes les rooms et leur disponibilité	/		✅
+/account/ticket/valid					Voir tous mes billets valide			/		✅
+/account/ticket/:id					Voir un billet					/		✅
+/movie							Voir tous les films disponibles cette semaine 	/ 	Voir tous les films
+/movie/:id						Voir un film par son id				/ 		✅
+/screens						Voir toutes les rooms et leur disponibilité	/		✅
 /screens/:id						Voir une salle par son id			/		✅
 /screens/:id/sessions					Voir les séances de la salle			/		✅
-/screenings						Voir toutes les séances			/		✅
+/screenings						Voir toutes les séances				/		✅
 /screenings/:id						Voir une séance avec son id			/ 		✅
 /users									❌				/	Voir tous les users
 /users/:id								❌				/	Voir un compte utilisateur
@@ -24,7 +26,8 @@ Routes								User					/	Admin
 
 @Post :
 /account/ticket							Acheter un billet			/		✅
-/films									❌				/	Enregistrer un film
+/account/ticket/update/:ticket_id			Mettre à jour le nombre d'utilisation du billet	/		✅
+/movie									❌				/	Enregistrer un film
 /rooms									❌				/ 	Enregistrer une salle
 /screenings								❌				/ 	Ajouter une scéance
 /screenings/:id/reservation					Réserver la séance par son id		/		✅
@@ -34,7 +37,7 @@ Routes								User					/	Admin
 
 @Patch :
 /account/balance						Ajouter de l'argent			/		✅
-/films/:id								❌				/	Update un Film
+/movie/:id								❌				/	Update un Film
 /screens/:id								❌				/ 	Update une salle
 /screenings/:id/update							❌				/ 	Update une séance
 /screenings/:id/cancel						Annuler une réservation			/		✅
@@ -49,15 +52,15 @@ Routes								User					/	Admin
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @Delete :
-/films/:id								❌				/	Supprimer un film enregistré
+/movie/:id								❌				/	Supprimer un film enregistré
 /screens/:id								❌				/	Supprimer une salle
 /sessions/:id								❌				/	Supprimer une séance
-/users/:id								Supprimer son compte		/	Supprimer un utilisateur
+/users/:id							Supprimer son compte			/	Supprimer un utilisateur
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Filter Films:
+Filter movie:
 - ?start_time="timestamps"
 - ?end_time="timestamps"
 - ?film="titre du film"
