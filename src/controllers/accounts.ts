@@ -11,6 +11,12 @@ import { createTicket, getMyValidTickets, getTicketsById, getTicketsByUserId, in
 @JsonController('/account')
 export class AccountController {
 
+    @Get('/')
+    @ResponseBody(200, z.array(zMyAccount))
+    async getAccount(@QueryParam('role') role: unknown, @CurrentUser() user: PublicUser): Promise<Account> {
+        return getAccountData(user)
+    }
+
     // ---------------------------------------------------- //
 
     @Get('/ticket')
