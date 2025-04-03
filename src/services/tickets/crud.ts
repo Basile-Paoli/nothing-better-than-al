@@ -1,7 +1,7 @@
 import { and, lt, eq } from "drizzle-orm";
 import { db } from "../../db/database";
 import { ticketTable } from "../../db/schema/tickets";
-import { MyTicket, Ticket} from "../../validators/tickets";
+import { CreateTicketParam, MyTicket, Ticket, zCreateTicketParams} from "../../validators/tickets";
 
 
 export async function getTicketsByUserId(user_id: number): Promise<Ticket[] | null>{
@@ -62,15 +62,27 @@ export async function getMyValidTickets(user_id: number): Promise<MyTicket | nul
     return myTicket
 }
 
-export async function createTicket(ticket: Omit<Ticket, 'id'>): Promise<Ticket | undefined> {
-    const newTicket = await db.insert(ticketTable).values(ticket).returning();
+export async function createTicket(ticket: CreateTicketParam, user_id: number): Promise<Ticket | undefined> {
+    const validatedTicket = zCreateTicketParams.parse(ticket);
 
-    if (!newTicket || newTicket.length === 0) {
+    const [returnTicket] = await db
+        .insert(ticketTable)
+        .values({
+            type: validatedTicket.type,
+            used: validatedTicket.used ? validatedTicket.used : 0,
+            max_usage: validatedTicket.max_usage,
+            userId: user_id,
+            buy_date: new Date().toISOString()
+        })
+        .returning()
+
+    if (!returnTicket) {
         throw new Error("Échec de la création du ticket.");
-      }
+    }
 
-    return newTicket[0];
-}  
+    return returnTicket;
+}
+
 
 export async function incrementUsedByOne(ticket_id: number): Promise<Ticket | undefined> {
     const ticket = await getTicketsById(ticket_id);
