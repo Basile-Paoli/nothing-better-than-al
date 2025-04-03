@@ -47,7 +47,7 @@ export class AccountController {
         const ticketParams = zCreateTicketParams.parse(body)
         return createTicket(ticketParams, user.id)
     }
-    @Post('/ticket/update/:ticket_id')
+    @Patch('/ticket/update/:ticket_id')
     @ResponseBody(200, z.array(zTicket))
     async updateTicket(@CurrentUser() user: PublicUser, @QueryParam('ticket_id') ticket_id: number): Promise<MyTicket | undefined>{
         const ticket = incrementUsedByOne(ticket_id)
