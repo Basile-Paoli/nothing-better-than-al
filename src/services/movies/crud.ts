@@ -1,8 +1,9 @@
 import {db} from "../../db/database";
-import {type Movie, movieTable} from "../../db/schema";
+import {type Movie, moviesSeenTable, movieTable} from "../../db/schema";
 import type {CreateMovieParams, UpdateMovieParams} from "../../validators/movies";
 import {eq} from "drizzle-orm";
 import {NotFoundError} from "routing-controllers";
+import { MoviesSeen } from "../../validators/movies";
 
 export async function createMovie(params: CreateMovieParams): Promise<Movie> {
 	const [movie] = await db.insert(movieTable)
@@ -47,4 +48,34 @@ export async function getMovieById(id: number): Promise<Movie> {
 	}
 
 	return movie;
+}
+
+export async function getMyMovies(id_user: number): Promise<MoviesSeen> {
+    const movies = await db
+        .select({
+            movieId: moviesSeenTable.movieId,
+            date: moviesSeenTable.date,
+            name: movieTable.name,
+            duration: movieTable.duration,
+        })
+        .from(moviesSeenTable)
+        .innerJoin(movieTable, eq(moviesSeenTable.movieId, movieTable.id))
+        .where(eq(moviesSeenTable.userId, id_user));
+
+    if (movies.length === 0) {
+        throw new NotFoundError('No movies found for this user');
+    }
+
+    if (movies.length === 0) {
+        throw new NotFoundError('No movies found for this user');
+    }
+
+    return movies.map((record) => ({
+        movies: {
+            id: record.movieId,
+            name: record.name,
+            duration: record.duration,
+        },
+        date: new Date(record.date),
+    }));
 }
