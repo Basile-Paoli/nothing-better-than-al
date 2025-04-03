@@ -1,4 +1,4 @@
-import { Body, CurrentUser, Get, JsonController, Patch, Post, QueryParam } from "routing-controllers";
+import { Authorized, Body, CurrentUser, Get, JsonController, Patch, Post, QueryParam } from "routing-controllers";
 import { RequestBody, ResponseBody } from "../open-api/decorators";
 import { PublicUser } from "../db/schema";
 import {z} from "zod";
@@ -12,6 +12,7 @@ import { createTicket, getMyValidTickets, getTicketsById, getTicketsByUserId, in
 export class AccountController {
 
     @Get('/')
+    @Authorized()
     @ResponseBody(200, z.array(zMyAccount))
     async getAccount(@QueryParam('role') role: unknown, @CurrentUser() user: PublicUser): Promise<Account> {
         return getAccountData(user)
@@ -26,26 +27,30 @@ export class AccountController {
     // ---------------------------------------------------- //
 
     @Get('/ticket')
+    @Authorized()
     @ResponseBody(200, z.array(zTicket))
     async getTicket(@CurrentUser() user: PublicUser): Promise<Ticket[] | null>{
         return getTicketsByUserId(user.id)
     }
 
     @Get('/ticket/valid')
+    @Authorized()
     @ResponseBody(200, z.array(zTicket))
     async getValidTicket(@CurrentUser() user: PublicUser): Promise<MyTicket | null>{
         return getMyValidTickets(user.id)
     }
 
     @Get('/ticket/:id')
+    @Authorized()
     @ResponseBody(200, z.array(zTicket))
     async getTicketById(@CurrentUser() user: PublicUser, @QueryParam('id') ticket_id: number): Promise<MyTicket | null>{
-        return getTicketsById(ticket_id)
+        return getTicketsById(ticket_id, user.id)
     }
 
     // ---------------------------------------------------- //
 
     @Post('/ticket')
+    @Authorized()
     @RequestBody(zCreateTicketParams)
     @ResponseBody(200, z.array(zTicket))
     async buyTicket(@CurrentUser() user: PublicUser, @Body() body: unknown): Promise<Ticket | undefined>{
@@ -57,12 +62,14 @@ export class AccountController {
     // ---------------------------------------------------- //
 
     @Patch('/ticket/update/:ticket_id')
+    @Authorized()
     @ResponseBody(200, z.array(zTicket))
     async updateTicket(@CurrentUser() user: PublicUser, @QueryParam('ticket_id') ticket_id: number): Promise<MyTicket | undefined>{
-        return incrementUsedByOne(ticket_id)
+        return incrementUsedByOne(ticket_id, user.id)
     }
         
     @Patch('/balance')
+    @Authorized()
     @ResponseBody(200, z.array(zTicket))
     async depositMoney(@CurrentUser() user: PublicUser): Promise<boolean>{
         return true
