@@ -30,7 +30,7 @@ export async function getTicketsById(ticket_id: number, user_id: number): Promis
     );
     console.log(validTickets, ticket_id)
     if (!validTickets || validTickets.length === 0) {
-      throw new TicketError("Le Ticket n'existe pas1", 404)
+      throw new TicketError("Le Ticket n'existe pas", 404)
     }
     return validTickets[0] as Ticket
 }  
@@ -70,6 +70,10 @@ export async function getMyValidTickets(user_id: number): Promise<MyTicket[] | n
 
 export async function createTicket(ticket: CreateTicketParam, user_id: number): Promise<Ticket | undefined> {
     const validatedTicket = zCreateTicketParams.parse(ticket);
+
+    if(validatedTicket.used && validatedTicket.used > validatedTicket.max_usage){
+      throw new TicketError("Impossible to create ticket where used is > to max_usage")
+    }
 
     const [returnTicket] = await db
         .insert(ticketTable)
