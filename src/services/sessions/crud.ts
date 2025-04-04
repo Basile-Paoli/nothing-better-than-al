@@ -2,12 +2,16 @@ import type {BookSessions} from "../../validators/sessions";
 import {PublicUser, sessionsTable, screenTable, movieTable, Session} from "../../db/schema";
 import {db} from "../../db/database";
 import {eq, sql} from "drizzle-orm";
-import { incrementTicketUsage, decrementTicketUsage } from "../tickets/crud";
+import { incrementTicketUsage, decrementTicketUsage, getTicketsById } from "../tickets/crud";
 import { TicketError } from "../../errors/TicketsErrors";
 import { SessionsError } from "../../errors/SessionsErrors";
 
 export async function bookSession(book_param: BookSessions, user: PublicUser, id_session: number): Promise<boolean>{
     // Ticket linked
+
+    // Verif if it's my ticket
+    await getTicketsById(book_param.ticket_id_used, user)
+
 	const ticket = await incrementTicketUsage(book_param.ticket_id_used, user, book_param.nb_place_to_book)
 	if(!ticket){
 		throw new TicketError("Invalid ticket")
