@@ -1,7 +1,4 @@
-import {db} from "../../db/database";
-import {eq} from "drizzle-orm";
-import {NotFoundError} from "routing-controllers";
-import { PublicUser, movieTable, moviesSeenTable } from "../../db/schema";
+import { PublicUser} from "../../db/schema";
 import { MoviesSeen } from "../../validators/movies";
 import { Account } from "../../validators/accounts";
 import { MyTicket } from "../../validators/tickets";
