@@ -8,6 +8,7 @@ Routes								User					/	Admin
 @Get :
 /account 						Voir mon compte					/		✅
 /account/balance					Voir l'argent sur mon compte			/		✅
+/account/balance/history				Voir l'historique des ajouts			/		✅
 /account/ticket						Voir tous mes billets				/		✅
 /account/ticket/valid					Voir tous mes billets valide			/		✅
 /account/ticket/:id					Voir un billet					/		✅
