@@ -2,10 +2,11 @@ import { Authorized, Body, CurrentUser, Get, JsonController, Patch, Post, QueryP
 import { RequestBody, ResponseBody } from "../open-api/decorators";
 import { PublicUser } from "../db/schema";
 import {z} from "zod";
-import { zMyAccount, zMyBalance, Account } from "../validators/accounts";
+import { zMyAccount, zMyBalance, Account, zDepositMoneyBalance } from "../validators/accounts";
 import { MyTicket, Ticket, zCreateTicketParams, zUpdateTicketParams } from "../validators/tickets";
 import { zTicket} from "../validators/tickets";
 import { getAccountData } from "../services/accounts/crud";
+import { depositPersonnalMoney, getPersonnalBalance } from "../services/balances/crud";
 import { createTicket, getMyValidTickets, getTicketsById, getTicketsByUserId, incrementUsed } from "../services/tickets/crud";
 
 @JsonController('/account')
@@ -21,7 +22,7 @@ export class AccountController {
     @Get('/balance')
     @ResponseBody(200, z.array(zMyBalance))
     async getBalance(@CurrentUser() user: PublicUser): Promise<Number>{
-        return 10
+        return getPersonnalBalance(user)
     }
 
     // ---------------------------------------------------- //
@@ -73,7 +74,8 @@ export class AccountController {
     @Patch('/balance')
     @Authorized()
     @ResponseBody(200, z.array(zTicket))
-    async depositMoney(@CurrentUser() user: PublicUser): Promise<boolean>{
-        return true
+    async depositMoney(@CurrentUser() user: PublicUser,  @Body() body: unknown): Promise<boolean>{
+        const amount = zDepositMoneyBalance.parse(body)
+        return depositPersonnalMoney(user, amount)
     }
 }
