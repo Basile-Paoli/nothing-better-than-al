@@ -2,11 +2,11 @@ import { Authorized, Body, CurrentUser, Get, JsonController, Patch, Post, QueryP
 import { RequestBody, ResponseBody } from "../open-api/decorators";
 import { PublicUser } from "../db/schema";
 import {z} from "zod";
-import { zMyAccount, zMyBalance, Account, zDepositMoneyBalance } from "../validators/accounts";
+import { zMyAccount, zMyBalance, Account, zDepositMoneyBalance, Balance } from "../validators/accounts";
 import { MyTicket, Ticket, zCreateTicketParams } from "../validators/tickets";
 import { zTicket} from "../validators/tickets";
 import { getAccountData } from "../services/accounts/crud";
-import { depositPersonnalMoney, getPersonnalBalance } from "../services/balances/crud";
+import { depositPersonnalMoney, getPersonnalBalance, getPersonnalHistoryBalance } from "../services/balances/crud";
 import { createTicket, getMyValidTickets, getTicketsById, getTicketsByUserId } from "../services/tickets/crud";
 
 @JsonController('/account')
@@ -24,6 +24,13 @@ export class AccountController {
     @ResponseBody(200, z.array(zMyBalance))
     async getBalance(@CurrentUser() user: PublicUser): Promise<number>{
         return getPersonnalBalance(user)
+    }
+
+    @Get('/balance/history')
+    @Authorized()
+    @ResponseBody(200, z.array(zMyBalance))
+    async getHistoryBalance(@CurrentUser() user: PublicUser): Promise<Balance[] | null>{
+        return getPersonnalHistoryBalance(user)
     }
 
     // ---------------------------------------------------- //
