@@ -10,6 +10,7 @@ import {UserController} from "./controllers/user";
 import {AuthController} from "./controllers/auth";
 import {MovieController} from "./controllers/movies";
 import {AccountController} from "./controllers/accounts";
+import {ScreenController} from "./controllers/screen";
 
 const port = 3000
 
@@ -18,7 +19,7 @@ const routingControllerOptions: RoutingControllersOptions = {
 	authorizationChecker: authMiddleware,
 	currentUserChecker: getCurrentUser,
 	middlewares: [ErrorHandler],
-	controllers: [UserController, AuthController, MovieController, AccountController],
+	controllers: [UserController, AuthController, MovieController, ScreenController, AccountController],
 	defaultErrorHandler: false
 }
 const app = createExpressServer(routingControllerOptions);
