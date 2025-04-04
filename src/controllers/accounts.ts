@@ -46,7 +46,7 @@ export class AccountController {
     @Authorized()
     @ResponseBody(200, z.array(zTicket))
     async getTicketById(@CurrentUser() user: PublicUser, @QueryParam('id') ticket_id: number): Promise<MyTicket | null>{
-        return getTicketsById(ticket_id, user.id)
+        return getTicketsById(ticket_id, user)
     }
 
     // ---------------------------------------------------- //

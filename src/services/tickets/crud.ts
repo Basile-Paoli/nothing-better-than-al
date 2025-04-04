@@ -3,6 +3,7 @@ import { db } from "../../db/database";
 import { ticketTable } from "../../db/schema/tickets";
 import { CreateTicketParam, MyTicket, Ticket, zCreateTicketParams} from "../../validators/tickets";
 import { TicketError } from "../../errors/TicketsErrors";
+import { PublicUser } from "../../db/schema";
 
 
 export async function getTicketsByUserId(user_id: number): Promise<Ticket[] | null>{
@@ -18,8 +19,10 @@ export async function getTicketsByUserId(user_id: number): Promise<Ticket[] | nu
     return validTickets as Ticket[]
 }
 
-export async function getTicketsById(ticket_id: number, user_id: number): Promise<Ticket | null>{
-    const validTickets = await db
+export async function getTicketsById(ticket_id: number, user: PublicUser): Promise<Ticket | null>{
+  let validTickets
+  if(user.role == "admin"){
+    validTickets = await db
     .select()
     .from(ticketTable)
     .where(
@@ -28,11 +31,21 @@ export async function getTicketsById(ticket_id: number, user_id: number): Promis
         eq(ticketTable.id, ticket_id)
       )
     );
-    console.log(validTickets, ticket_id)
-    if (!validTickets || validTickets.length === 0) {
-      throw new TicketError("Le Ticket n'existe pas", 404)
-    }
-    return validTickets[0] as Ticket
+  } else {
+    validTickets = await db
+  .select()
+  .from(ticketTable)
+  .where(
+    and(
+      eq(ticketTable.userId, user.id),
+      eq(ticketTable.id, ticket_id)
+    )
+  );
+  }
+  if (!validTickets || validTickets.length === 0) {
+    throw new TicketError("Le Ticket n'existe pas", 404)
+  }
+  return validTickets[0] as Ticket
 }  
 
 export async function getMyValidTickets(user_id: number): Promise<MyTicket[] | null> {
@@ -94,9 +107,9 @@ export async function createTicket(ticket: CreateTicketParam, user_id: number): 
 }
 
 
-export async function incrementUsed(ticket_id: number, user_id: number, nb_increment: number): Promise<Ticket | undefined> {
+export async function incrementUsed(ticket_id: number, user: PublicUser, nb_increment: number): Promise<Ticket | undefined> {
   console.log(ticket_id)
-    const ticket = await getTicketsById(ticket_id, user_id);
+    const ticket = await getTicketsById(ticket_id, user);
   
     if (!ticket) {
       throw new TicketError("Le ticket spécifié n'existe pas.", 404)
