@@ -1,5 +1,5 @@
 import { pgTable, serial, integer, date } from "drizzle-orm/pg-core";
-import { relations, InferSelectModel } from "drizzle-orm";
+import { relations/*, InferSelectModel*/ } from "drizzle-orm";
 import { userTable } from "./user";
 import { movieTable } from "./movies";
 

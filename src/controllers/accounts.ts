@@ -3,11 +3,11 @@ import { RequestBody, ResponseBody } from "../open-api/decorators";
 import { PublicUser } from "../db/schema";
 import {z} from "zod";
 import { zMyAccount, zMyBalance, Account, zDepositMoneyBalance } from "../validators/accounts";
-import { MyTicket, Ticket, zCreateTicketParams, zUpdateTicketParams } from "../validators/tickets";
+import { MyTicket, Ticket, zCreateTicketParams } from "../validators/tickets";
 import { zTicket} from "../validators/tickets";
 import { getAccountData } from "../services/accounts/crud";
 import { depositPersonnalMoney, getPersonnalBalance } from "../services/balances/crud";
-import { createTicket, getMyValidTickets, getTicketsById, getTicketsByUserId, incrementUsed } from "../services/tickets/crud";
+import { createTicket, getMyValidTickets, getTicketsById, getTicketsByUserId } from "../services/tickets/crud";
 
 @JsonController('/account')
 export class AccountController {
@@ -22,7 +22,7 @@ export class AccountController {
     @Get('/balance')
     @Authorized()
     @ResponseBody(200, z.array(zMyBalance))
-    async getBalance(@CurrentUser() user: PublicUser): Promise<Number>{
+    async getBalance(@CurrentUser() user: PublicUser): Promise<number>{
         return getPersonnalBalance(user)
     }
 
