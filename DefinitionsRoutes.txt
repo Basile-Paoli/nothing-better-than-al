@@ -17,8 +17,8 @@ Routes								User					/	Admin
 /screens						Voir toutes les rooms et leur disponibilité	/		✅
 /screens/:id						Voir une salle par son id			/		✅
 /screens/:id/sessions					Voir les séances de la salle			/		✅
-/screenings						Voir toutes les séances				/		✅
-/screenings/:id						Voir une séance avec son id			/ 		✅
+/sessions						Voir toutes les séances				/		✅
+/sessions/:id						Voir une séance avec son id			/ 		✅
 /users									❌				/	Voir tous les users
 /users/:id								❌				/	Voir un compte utilisateur
 
@@ -29,8 +29,8 @@ Routes								User					/	Admin
 /account/ticket							Acheter un billet			/		✅
 /movie									❌				/	Enregistrer un film
 /rooms									❌				/ 	Enregistrer une salle
-/screenings								❌				/ 	Ajouter une scéance
-/screenings/:id/reservation					Réserver la séance par son id		/		✅
+/sessions								❌				/ 	Ajouter une scéance
+/sessions/:id/reservation					Réserver la séance par son id		/		✅
 /ticket								Acheter un billet			/		✅
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,8 +39,8 @@ Routes								User					/	Admin
 /account/balance						Ajouter de l'argent			/		✅
 /movie/:id								❌				/	Update un Film
 /screens/:id								❌				/ 	Update une salle
-/screenings/:id/update							❌				/ 	Update une séance
-/screenings/:id/cancel						Annuler une réservation			/		✅
+/sessions/:id/update							❌				/ 	Update une séance
+/sessions/:id/cancel						Annuler une réservation			/		✅
 /users/:id/update						Update infos son compte			/		✅
 /users/:id/promote							❌				/	Promote un user to admin
 

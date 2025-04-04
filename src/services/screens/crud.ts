@@ -1,7 +1,8 @@
 import type {CreateScreenParams, UpdateScreenParams} from "../../validators/screens";
-import {type Screen, screenTable} from "../../db/schema";
+import type {BookSessions} from "../../validators/sessions";
+import {PublicUser, type Screen, sessionsTable, screenTable} from "../../db/schema";
 import {db} from "../../db/database";
-import {eq} from "drizzle-orm";
+import {and, eq, sql} from "drizzle-orm";
 import {NotFoundError} from "routing-controllers";
 
 export async function createScreen(params: CreateScreenParams): Promise<Screen> {

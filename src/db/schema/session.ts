@@ -1,24 +1,35 @@
 import {integer, pgTable, serial, date} from "drizzle-orm/pg-core";
-import {movieTable} from "./movies";
-import {screenTable} from "./cinema";
+import {Movie, movieTable} from "./movies";
+import {Screen, screenTable} from "./cinema";
 import {relations} from "drizzle-orm";
 
 
-export const screeningTable = pgTable('screening', {
+export const sessionsTable = pgTable('Sessions', {
 	id: serial().primaryKey(),
 	idMovie: integer().notNull().references(() => movieTable.id),
 	idCinema: integer().notNull().references(() => screenTable.id),
 	duration: integer().notNull(),
-	dateMovie: date().notNull()
+	dateMovie: date().notNull(),
+	spectators: integer().notNull().default(0)
 });
 
-export const screeningRelations = relations(screeningTable, ({one}) => ({
+export const sessionsRelations = relations(sessionsTable, ({one}) => ({
 	movie: one(movieTable, {
-		fields: [screeningTable.idMovie],
+		fields: [sessionsTable.idMovie],
 		references: [movieTable.id],
 	}),
 	cinema: one(screenTable, {
-		fields: [screeningTable.idCinema],
+		fields: [sessionsTable.idCinema],
 		references: [screenTable.id],
 	})
 }))
+
+
+export type Session = {
+	id: number,
+	movie: Movie,
+	cinema : Screen,
+	duration: number,
+	dateMovie: Date,
+	spectator: number
+}
