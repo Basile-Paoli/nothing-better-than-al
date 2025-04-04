@@ -134,3 +134,27 @@ export async function incrementTicketUsage(ticket_id: number, user: PublicUser, 
   
     return updatedTicket[0];
 }
+
+export async function decrementTicketUsage(ticket_id: number, user: PublicUser, nb_decrement: number): Promise<Ticket | undefined> {
+  console.log(ticket_id)
+    const ticket = await getTicketsById(ticket_id, user);
+  
+    if (!ticket) {
+      throw new TicketError("Le ticket spécifié n'existe pas.", 404)
+    }
+
+    if(ticket.used - nb_decrement < 0){
+      throw new TicketError(`Un Ticket ne peux pas avoir un nombre d'utilisation inférieur à 0`, 403)
+    }
+  
+    const updatedTicket = await db.update(ticketTable)
+      .set({ used: ticket.used - nb_decrement })
+      .where(eq(ticketTable.id, ticket_id))
+      .returning();
+
+    if (!updatedTicket || updatedTicket.length === 0) {
+      throw new TicketError("Échec de la mise à jour du ticket.")
+    }
+  
+    return updatedTicket[0];
+}
