@@ -12,7 +12,6 @@ export async function getAccountData(user: PublicUser): Promise<Account>{
     const account: Account = {
         user: user,
         movies: movies,
-        balance:10,
         valid_ticket: tickets
     }
     return account

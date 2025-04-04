@@ -6,7 +6,6 @@ import { zMyTicket } from "./tickets"
 export const zMyAccount = z.object({
     user: zPublicUser,
     movies: zMyMovies,
-    balance: z.number().int().positive().openapi({example: 12}),
     valid_ticket: z.array(zMyTicket).nullable()
 })
 
