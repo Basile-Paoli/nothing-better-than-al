@@ -20,6 +20,7 @@ export class AccountController {
     }
 
     @Get('/balance')
+    @Authorized()
     @ResponseBody(200, z.array(zMyBalance))
     async getBalance(@CurrentUser() user: PublicUser): Promise<Number>{
         return getPersonnalBalance(user)
