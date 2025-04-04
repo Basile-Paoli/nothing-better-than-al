@@ -14,4 +14,10 @@ export const zMyBalance = z.object({
     balance: z.number().int().positive().openapi({example: 12}),
 })
 
+export const zDepositMoneyBalance = z.object({
+    balance: z.number().int().positive().openapi({example: 12}),
+})
+
+
 export type Account = z.infer<typeof zMyAccount>;
+export type UpdateBalance = z.infer<typeof zDepositMoneyBalance>;
