@@ -47,7 +47,8 @@ export async function getMyValidTickets(user_id: number): Promise<MyTicket[] | n
       )
 
     if (!validTickets || validTickets.length == 0) {
-      throw new TicketError("Il n'y a pas de ticket valide", 404)
+      const tiket: MyTicket[] = []
+      return tiket
     }
 
     const validTicket = validTickets[0];
