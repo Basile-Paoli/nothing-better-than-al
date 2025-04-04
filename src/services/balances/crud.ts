@@ -1,5 +1,5 @@
 import {db} from "../../db/database";
-import {eq} from "drizzle-orm";
+import {eq, sql} from "drizzle-orm";
 import { PublicUser, userTable } from "../../db/schema";
 import { UpdateBalance } from "../../validators/accounts";
 import { BalanceError } from "../../errors/BalancesErrors";
@@ -37,7 +37,9 @@ export async function depositPersonnalMoney(user: PublicUser, param: UpdateBalan
 
 
     const res = await db.update(userTable)
-        .set(param)
+        .set({
+            balance: sql`${userTable.balance} + ${param.balance}`
+        })
         .where(eq(userTable.id, user.id))
         .returning()
 
