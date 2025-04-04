@@ -1,14 +1,14 @@
 import {z} from "zod";
 import type {AssertTrue, IsExact} from "conditional-type-checks";
 import type {Screen} from "../db/schema";
-import {typeEnum} from "../db/schema";
+import {cinematypeEnum} from "../db/schema";
 
 export const zScreen = z.object({
 	id: z.number().int().positive().openapi({example: 1}),
 	name: z.string().min(1).max(40).openapi({example: 'Screen 1'}),
 	description: z.string().nullable().openapi({example: 'Salle sans piscine'}),
 	imageUrl: z.string().max(120).openapi({example: 'https://monsite.fr/image.png'}),
-	type: z.enum(typeEnum.enumValues).nullable().openapi({example: '2D'}),
+	type: z.enum(cinematypeEnum.enumValues).nullable().openapi({example: '2D'}),
 	capacity: z.number().int().positive().openapi({example: 150}),
 	disability: z.boolean().openapi({example: true}),
 });
