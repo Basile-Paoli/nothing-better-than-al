@@ -36,7 +36,6 @@ Routes								User					/	Admin
 
 @Patch :
 /account/balance						Ajouter de l'argent			/		✅
-/account/ticket/update/:ticket_id			Mettre à jour le nombre d'utilisation du billet	/		✅
 /movie/:id								❌				/	Update un Film
 /screens/:id								❌				/ 	Update une salle
 /screenings/:id/update							❌				/ 	Update une séance

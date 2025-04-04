@@ -62,14 +62,21 @@ export class AccountController {
 
     // ---------------------------------------------------- //
 
-    @Patch('/ticket/update')
+    /*@Patch('/ticket/update')
     @Authorized()
     @RequestBody(zUpdateTicketParams)
     @ResponseBody(200, z.array(zTicket))
     async updateTicket(@CurrentUser() user: PublicUser, @Body() body: unknown): Promise<MyTicket | undefined>{
         const ticketParams = zUpdateTicketParams.parse(body)
-        return incrementUsed(ticketParams.id, user.id, ticketParams.nb_increment)
-    }
+        const res = incrementUsed(ticketParams.ticket_id, user.id, ticketParams.nb_increment)
+        if(res != undefined){
+            /*const movRes = registerUserToMovies()
+            if(!movRes){
+                return decrementUsed()
+            }*/
+        }
+        /*return res
+    }*/
         
     @Patch('/balance')
     @Authorized()
