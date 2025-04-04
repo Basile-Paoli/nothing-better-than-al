@@ -7,7 +7,7 @@ export const zMyAccount = z.object({
     user: zPublicUser,
     movies: zMyMovies,
     balance: z.number().int().positive().openapi({example: 12}),
-    last_ticket: zMyTicket.nullable()
+    valid_ticket: z.array(zMyTicket).nullable()
 })
 
 export const zMyBalance = z.object({
