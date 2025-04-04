@@ -5,7 +5,7 @@ import {zBookSessionsParams, zSessions} from "../validators/sessions";
 import { bookSession, getAllSessionsByScreen, getAllSessionsByMovie } from "../services/sessions/crud";
 
 @JsonController('/sessions')
-export class AccountController {
+export class SessionsController {
 
     @Get('/screen/:id')
     @ResponseBody(200, zSessions)
