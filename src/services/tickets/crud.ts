@@ -107,7 +107,7 @@ export async function createTicket(ticket: CreateTicketParam, user_id: number): 
 }
 
 
-export async function incrementUsed(ticket_id: number, user: PublicUser, nb_increment: number): Promise<Ticket | undefined> {
+export async function incrementTicketUsage(ticket_id: number, user: PublicUser, nb_increment: number): Promise<Ticket | undefined> {
   console.log(ticket_id)
     const ticket = await getTicketsById(ticket_id, user);
   
