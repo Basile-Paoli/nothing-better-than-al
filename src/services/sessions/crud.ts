@@ -2,7 +2,7 @@ import type {BookSessions, CreateSession} from "../../validators/sessions";
 import {PublicUser, sessionsTable, screenTable, movieTable, Session, moviesSeenTable} from "../../db/schema";
 import {db} from "../../db/database";
 import {and, between, eq, gte, lte, or, sql} from "drizzle-orm";
-import { incrementTicketUsage, getTicketsById } from "../tickets/crud";
+import { incrementTicketUsage, getTicketsById, decrementTicketUsage } from "../tickets/crud";
 import { TicketError } from "../../errors/TicketsErrors";
 import { SessionsError } from "../../errors/SessionsErrors";
 import { getMovieById } from "../movies/crud";
@@ -11,6 +11,7 @@ import { NotFoundError } from "routing-controllers";
 import { PgTransaction, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { ExtractTablesWithRelations } from "drizzle-orm";
 import * as schema from "../../db/schema";
+import { getUserById, getUsers } from "../users/listUsers";
 export type TransactionType = PgTransaction<PgQueryResultHKT, typeof schema, ExtractTablesWithRelations<typeof schema>>;
 
 export async function getSessionById(id_session: number): Promise<Session>{
@@ -122,22 +123,78 @@ async function checkIdASessionsAlreadyExistInThisScreenAndDate(session: CreateSe
     return overlappingSessions.length > 0;
 }
 
-export async function deleteSession(id_session: number): Promise<boolean>{
-    await getSessionById(id_session)
-    try{
-        const res = await db.delete(sessionsTable)
-        .where(eq(sessionsTable.id, id_session))
-        .returning()
-    
-        if(res && res.length > 0){
-            return true
-        }
-        return false
-    } catch (e){
-        console.error(e)
-        throw new SessionsError("Failed to delete Sessions")
+export async function deleteSession(id_session: number): Promise<boolean> {
+
+    const session = await getSessionById(id_session)
+    if(session.dateMovie <= new Date()){
+        throw new SessionsError("Impossible to delete a past session")
     }
+
+    // Il faut supprimer les sessions.
+    // Mais pour ça il faut mettre à jour la table des "films vu" par l'utilisateur.
+    // Il faut aussi mettre à jour les tickets utilisé pour reserver la place sur le film.
+
+    // Utilisation d'une transaction pour garantir la cohérence des données
+    return await db.transaction(async (trx: TransactionType) => {
+        try {
+            // Récupérer les films associés à la session
+            const movieSeen = await trx
+                .select()
+                .from(moviesSeenTable)
+                .where(eq(moviesSeenTable.sessionId, id_session));
+
+            // Parcourir chaque film pour update the used of the linked tickets
+            for (let index = 0; index < movieSeen.length; index++) {
+                const element = movieSeen[index];
+
+                if(element && element?.ticketId){
+                    const user = await getUserById(element.userId);
+
+                    if(user){
+                        const ticketUpdated = await decrementTicketUsage(
+                            element.ticketId,
+                            user!,
+                            element?.booked_place,
+                            trx
+                        );
+    
+                        if (!ticketUpdated) {
+                            throw new SessionsError("Impossible to delete the session, please try again");
+                        }
+                    }
+                }
+            }
+
+            // Update session ID to unlink it
+            const resUpdateMovieSeenSession = await trx
+                .update(moviesSeenTable)
+                .set({ sessionId: null }) // Remplace `sessionId` par null pour désassocier
+                .where(eq(moviesSeenTable.sessionId, id_session))
+                .returning();
+
+            if (!resUpdateMovieSeenSession || resUpdateMovieSeenSession.length === 0) {
+                throw new SessionsError("Failed to unlink associated movies seen records");
+            }
+
+
+            // Session
+            const res = await trx
+                .delete(sessionsTable)
+                .where(eq(sessionsTable.id, id_session))
+                .returning();
+
+            if (!res || res.length === 0) {
+                throw new SessionsError("Failed to delete the session");
+            }
+
+            return true;
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    });
 }
+
 
 export async function bookSession(book_param: BookSessions, user: PublicUser, id_session: number): Promise<boolean> {
     // Utilisation d'une trasaction pour la cohérence dans la DB
@@ -152,7 +209,7 @@ export async function bookSession(book_param: BookSessions, user: PublicUser, id
                 throw new TicketError("Invalid ticket");
             }
 
-            const movieSeenInserted = await insertMovieSeen(user.id, session.movie.id, session.dateMovie, trx);
+            const movieSeenInserted = await insertMovieSeen(user.id, session.movie.id, session.dateMovie, id_session, book_param.ticket_id_used, book_param.nb_place_to_book, trx);
             if (!movieSeenInserted) {
                 throw new TicketError("Server Error");
             }
@@ -172,11 +229,14 @@ export async function bookSession(book_param: BookSessions, user: PublicUser, id
 
 
 
-export async function insertMovieSeen(user_id: number, movie_id: number, date_movie: Date, trx: TransactionType): Promise<boolean>{
+export async function insertMovieSeen(user_id: number, movie_id: number, date_movie: Date, id_session: number, id_ticket: number, place_to_book: number, trx: TransactionType): Promise<boolean>{
     const moviesSeen = await trx.insert(moviesSeenTable).values({
         userId: user_id,
         movieId: movie_id,
         date: date_movie.toISOString(),
+        sessionId: id_session,
+        ticketId: id_ticket,
+        booked_place: place_to_book
     }).returning();
 
     if(moviesSeen && moviesSeen.length > 0){
@@ -201,7 +261,7 @@ export async function getAllSessionsByScreen(id_screen: number): Promise<Session
             name: screenTable.name,
             description: screenTable.description,
             imageUrl: screenTable.imageUrl,
-            type: screenTable.type,
+            //type: screenTable.type,
             capacity: screenTable.capacity,
             disability: screenTable.disability,
         },
@@ -237,7 +297,7 @@ export async function getAllSessionsByMovie(id_movie: number): Promise<Session[]
             name: screenTable.name,
             description: screenTable.description,
             imageUrl: screenTable.imageUrl,
-            type: screenTable.type,
+            //type: screenTable.type,
             capacity: screenTable.capacity,
             disability: screenTable.disability,
         },
