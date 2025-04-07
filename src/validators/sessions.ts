@@ -19,7 +19,7 @@ export const zCreateSessions = z.object({
 	duration: z.number().int().positive().openapi({example: 1}),
 	idMovie: z.number().int().positive().openapi({example: 1}),
     idScreen : z.number().int().positive().openapi({example: 1}),
-    dateMovie: z.date(),
+    dateMovie: z.string().datetime(),
 })
 
 
