@@ -12,3 +12,11 @@ export function getUsers(listUsersParams: ListUsersParams): Promise<PublicUser[]
 
 	return query
 }
+
+export async function getUserById(user_id: number): Promise<PublicUser | null> {
+	const user = await db.select(userPublicColumns).from(userTable).where(eq(userPublicColumns.id, user_id))
+	if(user && user.length > 0){
+		return user[0] as PublicUser
+	}
+	return null
+}
