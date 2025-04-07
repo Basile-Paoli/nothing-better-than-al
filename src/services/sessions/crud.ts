@@ -9,51 +9,96 @@ import { getMovieById } from "../movies/crud";
 import { getScreenById } from "../screens/crud";
 
 
-export async function createSession(session : CreateSession): Promise<Session>{
+export async function getSessionById(id_session: number): Promise<Session>{
+    const session = await db.select().from(sessionsTable)
+        .where(eq(sessionsTable.id, id_session))
+    
+    if(session && session.length > 0){
+        const ses = session[0]!
+        const movie = await getMovieById(ses.idMovie);
+        const cinema = await getScreenById(ses.idCinema);
 
-    const movie = await getMovieById(session.idMovie)
-    const screen = await getScreenById(session.idScreen)
-    if(!movie){
-        throw new SessionsError("This Movie don't exist")
-    }
-    if(!screen){
-        throw new SessionsError("This Room/Screen don't exist")
-    }
+        if (!movie) {
+            throw new SessionsError("Movie not found for this session", 404);
+        }
+        if (!cinema) {
+            throw new SessionsError("Cinema not found for this session", 404);
+        }
 
-    const res = await db.insert(sessionsTable).values({
-        duration: movie.duration,
-        idMovie: session.idMovie,
-        idCinema: session.idScreen,
-        dateMovie: session.dateMovie.toISOString(),
-        spectators: session.spectators,
-    }).returning()
-
-    if(res && res.length > 0){
-        const insertedRow = res[0]!;
-
-        const sessionResult: Session = {
-            id: insertedRow.id,
+        const enrichedSession: Session = {
+            id: ses.id,
             movie: movie,
-            cinema: screen,
-            duration: insertedRow.duration,
-            dateMovie: new Date(insertedRow.dateMovie),
-            spectator: insertedRow.spectators,
+            cinema: cinema,
+            duration: ses.duration,
+            dateMovie: new Date(ses.dateMovie),
+            spectator: ses.spectators,
         };
 
-        return sessionResult;
+        return enrichedSession;
     }
-    throw new SessionsError("Failed to create session");
+    throw new SessionsError("This Sessions don't exist", 404)
+}
+
+export async function createSession(session : CreateSession): Promise<Session>{
+
+    try{
+        const movie = await getMovieById(session.idMovie)
+        const screen = await getScreenById(session.idScreen)
+        if(!movie){
+            throw new SessionsError("This Movie don't exist", 404)
+        }
+        if(!screen){
+            throw new SessionsError("This Room/Screen don't exist", 404)
+        }
+
+        const res = await db.insert(sessionsTable).values({
+            duration: movie.duration,
+            idMovie: session.idMovie,
+            idCinema: session.idScreen,
+            dateMovie: session.dateMovie.toISOString(),
+            spectators: session.spectators,
+        }).returning()
+
+        if(res && res.length > 0){
+            const insertedRow = res[0]!;
+
+            const sessionResult: Session = {
+                id: insertedRow.id,
+                movie: movie,
+                cinema: screen,
+                duration: insertedRow.duration,
+                dateMovie: new Date(insertedRow.dateMovie),
+                spectator: insertedRow.spectators,
+            };
+
+            return sessionResult;
+        }
+        throw new SessionsError("Failed to insert session into database");
+    } catch (e){
+        console.error(e)
+        throw new SessionsError("Failed to create session");
+    }
 }
 
 export async function deleteSession(id_session: number): Promise<boolean>{
-    const res = await db.delete(sessionsTable)
+    try{
+        const resSession = await getSessionById(id_session)
+        if(!resSession){
+
+        }
+
+        const res = await db.delete(sessionsTable)
         .where(eq(sessionsTable.id, id_session))
         .returning()
     
         if(res && res.length > 0){
             return true
         }
-    return false
+        return false
+    } catch (e){
+        console.error(e)
+        throw new SessionsError("Failed to delete Sessions")
+    }
 }
 
 export async function bookSession(book_param: BookSessions, user: PublicUser, id_session: number): Promise<boolean>{
