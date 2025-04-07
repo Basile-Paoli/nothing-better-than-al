@@ -108,7 +108,7 @@ export async function createTicket(ticket: CreateTicketParam, user_id: number): 
 }
 
 
-export async function incrementTicketUsage(ticket_id: number, user: PublicUser, nb_increment: number): Promise<Ticket | undefined> {
+export async function incrementTicketUsage(ticket_id: number, user: PublicUser, nb_increment: number, trx: any): Promise<Ticket | undefined> {
   console.log(ticket_id)
     const ticket = await getTicketsById(ticket_id, user);
   
@@ -123,11 +123,11 @@ export async function incrementTicketUsage(ticket_id: number, user: PublicUser, 
     if(ticket.used + nb_increment > ticket.max_usage){
       throw new TicketError(`Il n'y a pas assez de place disponible sur ce ticket`, 403)
     }
-  
-    const updatedTicket = await db.update(ticketTable)
-      .set({ used: ticket.used + nb_increment })
-      .where(eq(ticketTable.id, ticket_id))
-      .returning();
+    
+    const updatedTicket = await trx.update(ticketTable)
+        .set({ used: ticket.used + nb_increment })
+        .where(eq(ticketTable.id, ticket_id))
+        .returning();
 
     if (!updatedTicket || updatedTicket.length === 0) {
       throw new TicketError("Échec de la mise à jour du ticket.")
@@ -136,7 +136,7 @@ export async function incrementTicketUsage(ticket_id: number, user: PublicUser, 
     return updatedTicket[0];
 }
 
-export async function decrementTicketUsage(ticket_id: number, user: PublicUser, nb_decrement: number): Promise<Ticket | undefined> {
+export async function decrementTicketUsage(ticket_id: number, user: PublicUser, nb_decrement: number, trx: any): Promise<Ticket | undefined> {
   console.log(ticket_id)
     const ticket = await getTicketsById(ticket_id, user);
   
@@ -148,7 +148,7 @@ export async function decrementTicketUsage(ticket_id: number, user: PublicUser, 
       throw new TicketError(`Un Ticket ne peux pas avoir un nombre d'utilisation inférieur à 0`, 403)
     }
   
-    const updatedTicket = await db.update(ticketTable)
+    const updatedTicket = await trx.update(ticketTable)
       .set({ used: ticket.used - nb_decrement })
       .where(eq(ticketTable.id, ticket_id))
       .returning();

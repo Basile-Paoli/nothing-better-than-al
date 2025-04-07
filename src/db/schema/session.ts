@@ -10,7 +10,7 @@ export const sessionsTable = pgTable('Sessions', {
 	idCinema: integer().notNull().references(() => screenTable.id),
 	duration: integer().notNull(),
 	dateMovie: date().notNull(),
-	spectators: integer().notNull().default(0)
+	remaining_places: integer().notNull().default(0)
 });
 
 export const sessionsRelations = relations(sessionsTable, ({one}) => ({
@@ -29,7 +29,6 @@ export type Session = {
 	id: number,
 	movie: Movie,
 	cinema : Screen,
-	duration: number,
 	dateMovie: Date,
-	spectator: number
+	remaining_places: number
 }

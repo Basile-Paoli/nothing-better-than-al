@@ -1,5 +1,5 @@
 import type {BookSessions, CreateSession} from "../../validators/sessions";
-import {PublicUser, sessionsTable, screenTable, movieTable, Session} from "../../db/schema";
+import {PublicUser, sessionsTable, screenTable, movieTable, Session, moviesSeenTable} from "../../db/schema";
 import {db} from "../../db/database";
 import {eq, sql} from "drizzle-orm";
 import { incrementTicketUsage, decrementTicketUsage, getTicketsById } from "../tickets/crud";
@@ -30,9 +30,8 @@ export async function getSessionById(id_session: number): Promise<Session>{
             id: ses.id,
             movie: movie,
             cinema: cinema,
-            duration: ses.duration,
             dateMovie: new Date(ses.dateMovie),
-            spectator: ses.spectators,
+            remaining_places: ses.remaining_places,
         };
 
         return enrichedSession;
@@ -52,7 +51,7 @@ export async function createSession(session : CreateSession): Promise<Session>{
             idMovie: session.idMovie,
             idCinema: session.idScreen,
             dateMovie: session.dateMovie,
-            spectators: screen.capacity
+            remaining_places: screen.capacity
         }).returning()
 
         if(res && res.length > 0){
@@ -62,9 +61,8 @@ export async function createSession(session : CreateSession): Promise<Session>{
                 id: insertedRow.id,
                 movie: movie,
                 cinema: screen,
-                duration: insertedRow.duration,
                 dateMovie: new Date(insertedRow.dateMovie),
-                spectator: insertedRow.spectators,
+                remaining_places: insertedRow.remaining_places,
             };
 
             return sessionResult;
@@ -93,32 +91,58 @@ export async function deleteSession(id_session: number): Promise<boolean>{
     }
 }
 
-export async function bookSession(book_param: BookSessions, user: PublicUser, id_session: number): Promise<boolean>{
+export async function bookSession(book_param: BookSessions, user: PublicUser, id_session: number): Promise<boolean> {
+    // Utilisation d'une trasaction pour la cohérence dans la DB
+    return await db.transaction(async (trx) => {
+        try {
+            await getTicketsById(book_param.ticket_id_used, user);
 
-    // Verif if it's my ticket
-    await getTicketsById(book_param.ticket_id_used, user)
+            const session = await getSessionById(id_session);
 
-    // Verif if the session exist
-    await getSessionById(id_session)
+            const ticket = await incrementTicketUsage(book_param.ticket_id_used, user, book_param.nb_place_to_book, trx);
+            if (!ticket) {
+                throw new TicketError("Invalid ticket");
+            }
 
-	const ticket = await incrementTicketUsage(book_param.ticket_id_used, user, book_param.nb_place_to_book)
-	if(!ticket){
-		throw new TicketError("Invalid ticket")
-	}
+            const movieSeenInserted = await insertMovieSeen(user.id, session.movie.id, session.dateMovie, trx);
+            if (!movieSeenInserted) {
+                throw new TicketError("Server Error");
+            }
 
-    if(!await lowerCapacity(id_session, book_param.nb_place_to_book)){
-        await decrementTicketUsage(book_param.ticket_id_used, user, book_param.nb_place_to_book)
+            const capacityReduced = await lowerCapacity(id_session, book_param.nb_place_to_book, trx);
+            if (!capacityReduced) {
+                throw new TicketError("Server Error");
+            }
+
+            return true;
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    });
+}
+
+
+
+export async function insertMovieSeen(user_id: number, movie_id: number, date_movie: Date, trx: any): Promise<boolean>{
+    const moviesSeen = await trx.insert(moviesSeenTable).values({
+        userId: user_id,
+        movieId: movie_id,
+        date: date_movie.toISOString(),
+    }).returning();
+
+    if(moviesSeen && moviesSeen.length > 0){
+        return true
     }
-	return true
+    return false
 }
 
 
 export async function getAllSessionsByScreen(id_screen: number): Promise<Session[]> {
     const sessions = await db.select({
         id: sessionsTable.id,
-        duration: sessionsTable.duration,
         dateMovie: sessionsTable.dateMovie,
-        spectators: sessionsTable.spectators,
+        remaining_places: sessionsTable.remaining_places,
         movie: {
             id: movieTable.id,
             name: movieTable.name,
@@ -129,7 +153,7 @@ export async function getAllSessionsByScreen(id_screen: number): Promise<Session
             name: screenTable.name,
             description: screenTable.description,
             imageUrl: screenTable.imageUrl,
-            type: screenTable.type,
+            //type: screenTable.type,
             capacity: screenTable.capacity,
             disability: screenTable.disability,
         },
@@ -143,9 +167,8 @@ export async function getAllSessionsByScreen(id_screen: number): Promise<Session
         id: session.id,
         movie: session.movie,
         cinema: session.cinema,
-        duration: session.duration,
         dateMovie: new Date(session.dateMovie),
-        spectator: session.spectators,
+        remaining_places: session.remaining_places,
     }));
 }
 
@@ -154,9 +177,8 @@ export async function getAllSessionsByScreen(id_screen: number): Promise<Session
 export async function getAllSessionsByMovie(id_movie: number): Promise<Session[]> {
     const sessions = await db.select({
         id: sessionsTable.id,
-        duration: sessionsTable.duration,
         dateMovie: sessionsTable.dateMovie,
-        spectators: sessionsTable.spectators,
+        remaining_places: sessionsTable.remaining_places,
         movie: {
             id: movieTable.id,
             name: movieTable.name,
@@ -167,7 +189,7 @@ export async function getAllSessionsByMovie(id_movie: number): Promise<Session[]
             name: screenTable.name,
             description: screenTable.description,
             imageUrl: screenTable.imageUrl,
-            type: screenTable.type,
+            //type: screenTable.type,
             capacity: screenTable.capacity,
             disability: screenTable.disability,
         },
@@ -181,45 +203,34 @@ export async function getAllSessionsByMovie(id_movie: number): Promise<Session[]
         id: session.id,
         movie: session.movie,
         cinema: session.cinema,
-        duration: session.duration,
         dateMovie: new Date(session.dateMovie),
-        spectator: session.spectators,
+        remaining_places: session.remaining_places,
     }));
 }
 
 
 
-
-
-
-
-
-
-
-
-
-
 // If someone book a Sessions
-async function lowerCapacity(id_session: number, number_to_decrease: number): Promise<boolean> {
-    const capacityResult = await db.select({ spectator: sessionsTable.spectators })
+async function lowerCapacity(id_session: number, number_to_decrease: number, trx: any): Promise<boolean> {
+    const capacityResult = await trx.select({ remaining_places: sessionsTable.remaining_places })
         .from(sessionsTable)
         .where(eq(sessionsTable.id, id_session));
 
     let currentCapacity;
-    if (capacityResult.length > 0 && capacityResult[0]?.spectator !== undefined) {
-        currentCapacity = capacityResult[0].spectator;
+    if (capacityResult.length > 0 && capacityResult[0]?.remaining_places !== undefined) {
+        currentCapacity = capacityResult[0].remaining_places;
     } else {
         currentCapacity = 0;
-        console.log("This session doesn't have a spectator count defined");
+        console.log("This session doesn't have a remaining_places count defined");
     }
 
     if (currentCapacity < number_to_decrease) {
         return false;
     }
 
-    const res = await db.update(sessionsTable)
+    const res = await trx.update(sessionsTable)
         .set({
-            spectators: sql`${sessionsTable.spectators} - ${number_to_decrease}`
+            remaining_places: sql`${sessionsTable.remaining_places} - ${number_to_decrease}`,
         })
         .where(eq(sessionsTable.id, id_session))
         .returning();
@@ -229,6 +240,7 @@ async function lowerCapacity(id_session: number, number_to_decrease: number): Pr
     }
     return false;
 }
+
 
 /*
 // If someone cancel his reservation
@@ -245,7 +257,7 @@ async function upCapacity(id_screen: number, number_to_increase: number, id_sess
         throw new SessionsError("This screen don't have a capacity defined")
     }
 
-    const capacityResult = await db.select({ spectator: sessionsTable.spectators })
+    const capacityResult = await db.select({ remaining_places: sessionsTable.remaining_places })
         .from(sessionsTable)
         .where(eq(sessionsTable.id, id_session));
 
@@ -255,11 +267,11 @@ async function upCapacity(id_screen: number, number_to_increase: number, id_sess
 
 
     let currentCapacity
-    if (capacityResult.length > 0 && capacityResult[0]?.spectator !== undefined) {
-        currentCapacity = capacityResult[0].spectator;
+    if (capacityResult.length > 0 && capacityResult[0]?.remaining_places !== undefined) {
+        currentCapacity = capacityResult[0].remaining_places;
     } else {
         currentCapacity = 0
-        console.log("This screen don't have a spectator defined")
+        console.log("This screen don't have a remaining_places defined")
     }
 
     if (currentCapacity + number_to_increase > maxCapacity) {
@@ -268,7 +280,7 @@ async function upCapacity(id_screen: number, number_to_increase: number, id_sess
 
     const res = await db.update(sessionsTable)
         .set({
-            spectators: sql`${sessionsTable.spectators} + ${number_to_increase}`
+            remaining_places: sql`${sessionsTable.remaining_places} + ${number_to_increase}`
         })
         .where(eq(sessionsTable.id, id_session)).returning();
 
