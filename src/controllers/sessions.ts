@@ -31,6 +31,7 @@ export class SessionsController {
 
     @Post('/create')
     @Authorized('admin')
+    @RequestBody(zCreateSessions)
     @ResponseBody(200, zSessions)
     async createSession(@Body() sessionData: unknown): Promise<Session> {
         const validatedData = zCreateSessions.parse(sessionData)
