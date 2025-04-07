@@ -20,7 +20,6 @@ export const zCreateSessions = z.object({
 	idMovie: z.number().int().positive().openapi({example: 1}),
     idScreen : z.number().int().positive().openapi({example: 1}),
     dateMovie: z.date(),
-	spectators: z.number().int().min(0).openapi({example: 100})
 })
 
 

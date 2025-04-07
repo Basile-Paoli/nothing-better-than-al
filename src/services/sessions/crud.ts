@@ -56,7 +56,7 @@ export async function createSession(session : CreateSession): Promise<Session>{
             idMovie: session.idMovie,
             idCinema: session.idScreen,
             dateMovie: session.dateMovie.toISOString(),
-            spectators: session.spectators,
+            spectators: screen.capacity
         }).returning()
 
         if(res && res.length > 0){
