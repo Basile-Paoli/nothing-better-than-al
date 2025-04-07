@@ -45,6 +45,17 @@ export async function createSession(session : CreateSession): Promise<Session>{
     throw new SessionsError("Failed to create session");
 }
 
+export async function deleteSession(id_session: number): Promise<boolean>{
+    const res = await db.delete(sessionsTable)
+        .where(eq(sessionsTable.id, id_session))
+        .returning()
+    
+        if(res && res.length > 0){
+            return true
+        }
+    return false
+}
+
 export async function bookSession(book_param: BookSessions, user: PublicUser, id_session: number): Promise<boolean>{
 
     // Verif if it's my ticket
