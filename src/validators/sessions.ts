@@ -15,5 +15,15 @@ export const zSessions = z.object({
     movie: zMovie
 })
 
+export const zCreateSessions = z.object({
+	duration: z.number().int().positive().openapi({example: 1}),
+	idMovie: z.number().int().positive().openapi({example: 1}),
+    idScreen : z.number().int().positive().openapi({example: 1}),
+    dateMovie: z.date(),
+	spectators: z.number().int().min(0).openapi({example: 100})
+})
+
+
 export type BookSessions = z.infer<typeof zBookSessionsParams>
+export type CreateSession = z.infer<typeof zCreateSessions>
 //export type Sessions = z.infer<typeof zSessions>

@@ -1,13 +1,51 @@
-import type {BookSessions} from "../../validators/sessions";
+import type {BookSessions, CreateSession} from "../../validators/sessions";
 import {PublicUser, sessionsTable, screenTable, movieTable, Session} from "../../db/schema";
 import {db} from "../../db/database";
 import {eq, sql} from "drizzle-orm";
 import { incrementTicketUsage, decrementTicketUsage, getTicketsById } from "../tickets/crud";
 import { TicketError } from "../../errors/TicketsErrors";
 import { SessionsError } from "../../errors/SessionsErrors";
+import { getMovieById } from "../movies/crud";
+import { getScreenById } from "../screens/crud";
+
+
+export async function createSession(session : CreateSession): Promise<Session>{
+
+    const movie = await getMovieById(session.idMovie)
+    const screen = await getScreenById(session.idScreen)
+    if(!movie){
+        throw new SessionsError("This Movie don't exist")
+    }
+    if(!screen){
+        throw new SessionsError("This Room/Screen don't exist")
+    }
+
+    const res = await db.insert(sessionsTable).values({
+        duration: movie.duration,
+        idMovie: session.idMovie,
+        idCinema: session.idScreen,
+        dateMovie: session.dateMovie.toISOString(),
+        spectators: session.spectators,
+    }).returning()
+
+    if(res && res.length > 0){
+        const insertedRow = res[0]!;
+
+        const sessionResult: Session = {
+            id: insertedRow.id,
+            movie: movie,
+            cinema: screen,
+            duration: insertedRow.duration,
+            dateMovie: new Date(insertedRow.dateMovie),
+            spectator: insertedRow.spectators,
+        };
+
+        return sessionResult;
+    }
+    throw new SessionsError("Failed to create session");
+}
 
 export async function bookSession(book_param: BookSessions, user: PublicUser, id_session: number): Promise<boolean>{
-    // Ticket linked
 
     // Verif if it's my ticket
     await getTicketsById(book_param.ticket_id_used, user)
