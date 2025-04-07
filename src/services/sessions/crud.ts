@@ -7,6 +7,7 @@ import { TicketError } from "../../errors/TicketsErrors";
 import { SessionsError } from "../../errors/SessionsErrors";
 import { getMovieById } from "../movies/crud";
 import { getScreenById } from "../screens/crud";
+import { NotFoundError } from "routing-controllers";
 
 
 export async function getSessionById(id_session: number): Promise<Session>{
@@ -19,10 +20,10 @@ export async function getSessionById(id_session: number): Promise<Session>{
         const cinema = await getScreenById(ses.idCinema);
 
         if (!movie) {
-            throw new SessionsError("Movie not found for this session", 404);
+            throw new NotFoundError("Movie not found for this session");
         }
         if (!cinema) {
-            throw new SessionsError("Cinema not found for this session", 404);
+            throw new NotFoundError("Cinema not found for this session");
         }
 
         const enrichedSession: Session = {
@@ -100,6 +101,9 @@ export async function bookSession(book_param: BookSessions, user: PublicUser, id
 
     // Verif if it's my ticket
     await getTicketsById(book_param.ticket_id_used, user)
+
+    // Verif if the session exist
+    await getSessionById(id_session)
 
 	const ticket = await incrementTicketUsage(book_param.ticket_id_used, user, book_param.nb_place_to_book)
 	if(!ticket){
