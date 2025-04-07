@@ -11,7 +11,7 @@ import { NotFoundError } from "routing-controllers";
 import { PgTransaction, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { ExtractTablesWithRelations } from "drizzle-orm";
 import * as schema from "../../db/schema";
-import { getUserById, getUsers } from "../users/listUsers";
+import { getUserById } from "../users/listUsers";
 export type TransactionType = PgTransaction<PgQueryResultHKT, typeof schema, ExtractTablesWithRelations<typeof schema>>;
 
 export async function getSessionById(id_session: number): Promise<Session>{
@@ -273,8 +273,8 @@ export async function getAllSessionsByScreen(id_screen: number): Promise<Session
 
     return sessions.map((session) => ({
         id: session.id,
-        movie: session.movie,
-        cinema: session.cinema,
+        movie: session.movie as schema.Movie,
+        cinema: session.cinema as schema.Screen,
         dateMovie: new Date(session.dateMovie),
         remaining_places: session.remaining_places,
     }));
@@ -309,8 +309,8 @@ export async function getAllSessionsByMovie(id_movie: number): Promise<Session[]
 
     return sessions.map((session) => ({
         id: session.id,
-        movie: session.movie,
-        cinema: session.cinema,
+        movie: session.movie as schema.Movie,
+        cinema: session.cinema as schema.Screen,
         dateMovie: new Date(session.dateMovie),
         remaining_places: session.remaining_places,
     }));

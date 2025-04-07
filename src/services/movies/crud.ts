@@ -1,5 +1,5 @@
 import {db} from "../../db/database";
-import {type Movie, moviesSeenTable, movieTable, sessionsTable} from "../../db/schema";
+import {type Movie, moviesSeenTable, movieTable} from "../../db/schema";
 import type {CreateMovieParams, UpdateMovieParams} from "../../validators/movies";
 import {eq} from "drizzle-orm";
 import {NotFoundError} from "routing-controllers";
