@@ -36,26 +36,21 @@ export async function getSessionById(id_session: number): Promise<Session>{
 
         return enrichedSession;
     }
-    throw new SessionsError("This Sessions don't exist", 404)
+    throw new NotFoundError("This Sessions don't exist")
 }
 
 export async function createSession(session : CreateSession): Promise<Session>{
+    // Errors are handled inside their functions
+    const movie = await getMovieById(session.idMovie)
+    const screen = await getScreenById(session.idScreen)
 
     try{
-        const movie = await getMovieById(session.idMovie)
-        const screen = await getScreenById(session.idScreen)
-        if(!movie){
-            throw new SessionsError("This Movie don't exist", 404)
-        }
-        if(!screen){
-            throw new SessionsError("This Room/Screen don't exist", 404)
-        }
 
         const res = await db.insert(sessionsTable).values({
             duration: movie.duration,
             idMovie: session.idMovie,
             idCinema: session.idScreen,
-            dateMovie: session.dateMovie.toISOString(),
+            dateMovie: session.dateMovie,
             spectators: screen.capacity
         }).returning()
 
