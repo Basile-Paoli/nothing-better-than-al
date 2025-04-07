@@ -11,21 +11,21 @@ export class SessionsController {
     @Get('/:id')
     @ResponseBody(200, zSessions)
     async getSessionById(@Param('id') id_session: number): Promise<Session> {
-        const validatedData = zId.parse(id_session)
+        zId.parse(id_session)
         return await getSessionById(id_session)
     }
 
     @Get('/screen/:id')
     @ResponseBody(200, zSessions)
     async getAllSessionsByScreen(@Param('id') id_screen: number): Promise<Session[]> {
-        const validatedData = zId.parse(id_screen)
+        zId.parse(id_screen)
         return await getAllSessionsByScreen(id_screen)
     }
 
     @Get('/movie/:id')
     @ResponseBody(200, zSessions)
     async getAllSessionsByMovie(@Param('id') id_movie: number,): Promise<Session[]> {
-        const validatedData = zId.parse(id_movie)
+        zId.parse(id_movie)
         return await getAllSessionsByMovie(id_movie)
     }
 
@@ -51,7 +51,7 @@ export class SessionsController {
     @Authorized('admin')
     @ResponseBody(200, zSessions)
     async deleteSessionById(@Param('id') id_session: number): Promise<boolean> {
-        const validatedData = zId.parse(id_session)
+        zId.parse(id_session)
         return await deleteSession(id_session)
     }
 

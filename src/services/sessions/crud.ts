@@ -77,12 +77,8 @@ export async function createSession(session : CreateSession): Promise<Session>{
 }
 
 export async function deleteSession(id_session: number): Promise<boolean>{
+    await getSessionById(id_session)
     try{
-        const resSession = await getSessionById(id_session)
-        if(!resSession){
-
-        }
-
         const res = await db.delete(sessionsTable)
         .where(eq(sessionsTable.id, id_session))
         .returning()
@@ -234,6 +230,7 @@ async function lowerCapacity(id_session: number, number_to_decrease: number): Pr
     return false;
 }
 
+/*
 // If someone cancel his reservation
 async function upCapacity(id_screen: number, number_to_increase: number, id_session: number): Promise<boolean> {
 
@@ -280,3 +277,4 @@ async function upCapacity(id_screen: number, number_to_increase: number, id_sess
     }
     return false
 }
+*/
