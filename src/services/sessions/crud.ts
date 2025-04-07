@@ -2,13 +2,16 @@ import type {BookSessions, CreateSession} from "../../validators/sessions";
 import {PublicUser, sessionsTable, screenTable, movieTable, Session, moviesSeenTable} from "../../db/schema";
 import {db} from "../../db/database";
 import {and, between, eq, gte, lte, or, sql} from "drizzle-orm";
-import { incrementTicketUsage, decrementTicketUsage, getTicketsById } from "../tickets/crud";
+import { incrementTicketUsage, getTicketsById } from "../tickets/crud";
 import { TicketError } from "../../errors/TicketsErrors";
 import { SessionsError } from "../../errors/SessionsErrors";
 import { getMovieById } from "../movies/crud";
 import { getScreenById } from "../screens/crud";
 import { NotFoundError } from "routing-controllers";
-
+import { PgTransaction, PgQueryResultHKT } from "drizzle-orm/pg-core";
+import { ExtractTablesWithRelations } from "drizzle-orm";
+import * as schema from "../../db/schema";
+export type TransactionType = PgTransaction<PgQueryResultHKT, typeof schema, ExtractTablesWithRelations<typeof schema>>;
 
 export async function getSessionById(id_session: number): Promise<Session>{
     const session = await db.select().from(sessionsTable)
@@ -119,11 +122,6 @@ async function checkIdASessionsAlreadyExistInThisScreenAndDate(session: CreateSe
     return overlappingSessions.length > 0;
 }
 
-
-
-
-
-
 export async function deleteSession(id_session: number): Promise<boolean>{
     await getSessionById(id_session)
     try{
@@ -143,7 +141,7 @@ export async function deleteSession(id_session: number): Promise<boolean>{
 
 export async function bookSession(book_param: BookSessions, user: PublicUser, id_session: number): Promise<boolean> {
     // Utilisation d'une trasaction pour la cohérence dans la DB
-    return await db.transaction(async (trx) => {
+    return await db.transaction(async (trx: TransactionType) => {
         try {
             await getTicketsById(book_param.ticket_id_used, user);
 

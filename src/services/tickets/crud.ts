@@ -5,6 +5,7 @@ import { CreateTicketParam, MyTicket, Ticket, zCreateTicketParams} from "../../v
 import { TicketError } from "../../errors/TicketsErrors";
 import { PublicUser } from "../../db/schema";
 import { NotFoundError } from "routing-controllers";
+import { TransactionType } from "../sessions/crud";
 
 
 export async function getTicketsByUserId(user_id: number): Promise<Ticket[] | null>{
@@ -107,8 +108,7 @@ export async function createTicket(ticket: CreateTicketParam, user_id: number): 
     return returnTicket;
 }
 
-
-export async function incrementTicketUsage(ticket_id: number, user: PublicUser, nb_increment: number, trx: any): Promise<Ticket | undefined> {
+export async function incrementTicketUsage(ticket_id: number, user: PublicUser, nb_increment: number, trx: TransactionType): Promise<Ticket | undefined> {
   console.log(ticket_id)
     const ticket = await getTicketsById(ticket_id, user);
   
@@ -136,7 +136,7 @@ export async function incrementTicketUsage(ticket_id: number, user: PublicUser, 
     return updatedTicket[0];
 }
 
-export async function decrementTicketUsage(ticket_id: number, user: PublicUser, nb_decrement: number, trx: any): Promise<Ticket | undefined> {
+export async function decrementTicketUsage(ticket_id: number, user: PublicUser, nb_decrement: number, trx: TransactionType): Promise<Ticket | undefined> {
   console.log(ticket_id)
     const ticket = await getTicketsById(ticket_id, user);
   
