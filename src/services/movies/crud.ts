@@ -1,5 +1,5 @@
 import {db} from "../../db/database";
-import {type Movie, moviesSeenTable, movieTable} from "../../db/schema";
+import {type Movie, moviesSeenTable, movieTable, sessionsTable} from "../../db/schema";
 import type {CreateMovieParams, UpdateMovieParams} from "../../validators/movies";
 import {eq} from "drizzle-orm";
 import {NotFoundError} from "routing-controllers";
@@ -57,6 +57,8 @@ export async function getMyMovies(id_user: number): Promise<MoviesSeen> {
             date: moviesSeenTable.date,
             name: movieTable.name,
             duration: movieTable.duration,
+			sessionId: moviesSeenTable.sessionId,
+			booked_place: moviesSeenTable.booked_place
         })
         .from(moviesSeenTable)
         .innerJoin(movieTable, eq(moviesSeenTable.movieId, movieTable.id))
@@ -77,6 +79,8 @@ export async function getMyMovies(id_user: number): Promise<MoviesSeen> {
             id: record.movieId,
             name: record.name,
             duration: record.duration,
+			sessionId: record.sessionId,
+			booked_place: record.booked_place,
         },
         date: new Date(record.date),
     }));
