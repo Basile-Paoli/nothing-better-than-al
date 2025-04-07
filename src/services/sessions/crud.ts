@@ -1,7 +1,7 @@
 import type {BookSessions, CreateSession} from "../../validators/sessions";
 import {PublicUser, sessionsTable, screenTable, movieTable, Session, moviesSeenTable} from "../../db/schema";
 import {db} from "../../db/database";
-import {eq, sql} from "drizzle-orm";
+import {and, between, eq, gte, lte, or, sql} from "drizzle-orm";
 import { incrementTicketUsage, decrementTicketUsage, getTicketsById } from "../tickets/crud";
 import { TicketError } from "../../errors/TicketsErrors";
 import { SessionsError } from "../../errors/SessionsErrors";
@@ -40,6 +40,9 @@ export async function getSessionById(id_session: number): Promise<Session>{
 }
 
 export async function createSession(session : CreateSession): Promise<Session>{
+    if(await checkIdASessionsAlreadyExistInThisScreenAndDate(session)){
+        throw new SessionsError("A Sessions is already created at the date for this screen", 403)
+    }
     // Errors are handled inside their functions
     const movie = await getMovieById(session.idMovie)
     const screen = await getScreenById(session.idScreen)
@@ -50,7 +53,7 @@ export async function createSession(session : CreateSession): Promise<Session>{
             duration: movie.duration,
             idMovie: session.idMovie,
             idCinema: session.idScreen,
-            dateMovie: session.dateMovie,
+            dateMovie: new Date(session.dateMovie),
             remaining_places: screen.capacity
         }).returning()
 
@@ -73,6 +76,53 @@ export async function createSession(session : CreateSession): Promise<Session>{
         throw new SessionsError("Failed to create session");
     }
 }
+
+async function checkIdASessionsAlreadyExistInThisScreenAndDate(session: CreateSession): Promise<boolean> {
+    const newSessionStart = new Date(session.dateMovie).toISOString();
+    const newSessionEnd = new Date(new Date(session.dateMovie).getTime() + session.duration * 60 * 1000).toISOString();
+
+    console.log("Session Start:", newSessionStart);
+    console.log("Session End:", newSessionEnd);
+
+    // Requête pour vérifier les sessions qui se chevauchent
+    const overlappingSessions = await db
+    .select({
+        id: sessionsTable.id,
+    })
+    .from(sessionsTable)
+    .where(
+        and(
+            eq(sessionsTable.idCinema, session.idScreen),
+            or(
+                // Une session existante commence entre le début et la fin de la nouvelle session
+                between(sessionsTable.dateMovie, sql`${newSessionStart}`, sql`${newSessionEnd}`),
+                // Une session existante se termine entre le début et la fin de la nouvelle session
+                between(
+                    sql`${sessionsTable.dateMovie} + make_interval(mins => ${session.duration + 14})`,
+                    sql`${newSessionStart}`,
+                    sql`${newSessionEnd}`
+                ),
+                // La nouvelle session englobe complètement une session existante
+                and(
+                    lte(sessionsTable.dateMovie, sql`${newSessionStart}`),
+                    gte(
+                        sql`${sessionsTable.dateMovie} + make_interval(mins => ${session.duration + 14})`,
+                        sql`${newSessionEnd}`
+                    )
+                )
+            )
+        )
+    );
+
+    console.log("Overlapping Sessions:", overlappingSessions);
+
+    return overlappingSessions.length > 0;
+}
+
+
+
+
+
 
 export async function deleteSession(id_session: number): Promise<boolean>{
     await getSessionById(id_session)
