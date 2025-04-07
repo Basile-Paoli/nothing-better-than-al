@@ -172,7 +172,7 @@ export async function bookSession(book_param: BookSessions, user: PublicUser, id
 
 
 
-export async function insertMovieSeen(user_id: number, movie_id: number, date_movie: Date, trx: any): Promise<boolean>{
+export async function insertMovieSeen(user_id: number, movie_id: number, date_movie: Date, trx: TransactionType): Promise<boolean>{
     const moviesSeen = await trx.insert(moviesSeenTable).values({
         userId: user_id,
         movieId: movie_id,
@@ -259,7 +259,7 @@ export async function getAllSessionsByMovie(id_movie: number): Promise<Session[]
 
 
 // If someone book a Sessions
-async function lowerCapacity(id_session: number, number_to_decrease: number, trx: any): Promise<boolean> {
+async function lowerCapacity(id_session: number, number_to_decrease: number, trx: TransactionType): Promise<boolean> {
     const capacityResult = await trx.select({ remaining_places: sessionsTable.remaining_places })
         .from(sessionsTable)
         .where(eq(sessionsTable.id, id_session));
