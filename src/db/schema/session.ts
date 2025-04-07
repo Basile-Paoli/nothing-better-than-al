@@ -1,4 +1,4 @@
-import {integer, pgTable, serial, date} from "drizzle-orm/pg-core";
+import {integer, pgTable, serial, timestamp} from "drizzle-orm/pg-core";
 import {Movie, movieTable} from "./movies";
 import {Screen, screenTable} from "./cinema";
 import {relations} from "drizzle-orm";
@@ -9,7 +9,7 @@ export const sessionsTable = pgTable('Sessions', {
 	idMovie: integer().notNull().references(() => movieTable.id),
 	idCinema: integer().notNull().references(() => screenTable.id),
 	duration: integer().notNull(),
-	dateMovie: date().notNull(),
+	dateMovie: timestamp("dateMovie").notNull(),
 	remaining_places: integer().notNull().default(0)
 });
 
