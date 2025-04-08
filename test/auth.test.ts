@@ -15,7 +15,9 @@ describe('register', () => {
 
 		expect(users.data).toContainEqual(expect.objectContaining({
 			email: 'patrick@example.com',
-			role: 'customer'
+			role: 'customer',
+			balance:0,
+			id:3
 		}))
 	})
 
