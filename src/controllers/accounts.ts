@@ -76,7 +76,7 @@ export class AccountController {
     async buyTicket(@CurrentUser() user: PublicUser, @Body() body: unknown): Promise<Ticket | undefined>{
 
         const ticketParams = zCreateTicketParams.parse(body)
-        return createTicket(ticketParams, user.id)
+        return createTicket(ticketParams, user)
     }
 
     // ---------------------------------------------------- //
