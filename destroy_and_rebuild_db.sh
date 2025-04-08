@@ -8,3 +8,5 @@ sleep 10
 echo "Database is ready!"
 
 npm run prepare-test
+
+npm run dev
