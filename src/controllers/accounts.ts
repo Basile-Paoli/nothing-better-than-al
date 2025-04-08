@@ -19,7 +19,7 @@ export class AccountController {
     async getAccount(@QueryParam('role') role: unknown, @CurrentUser() user: PublicUser): Promise<Account> {
         let balance = 0
         try{balance = await getPersonnalBalance(user)}catch(e){console.error(e)}
-        var cleanUser: any = {
+        let cleanUser: any = {
             email: user.email,
             role: user.role,
             id : user.id,
