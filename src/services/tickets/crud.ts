@@ -6,6 +6,8 @@ import { TicketError } from "../../errors/TicketsErrors";
 import { PublicUser } from "../../db/schema";
 import { NotFoundError } from "routing-controllers";
 import { TransactionType } from "../sessions/crud";
+import { getPersonnalBalance, withdrawMoneyFromAccount } from "../balances/crud";
+import { BalanceError } from "../../errors/BalancesErrors";
 
 
 export async function getTicketsByUserId(user_id: number): Promise<Ticket[] | null>{
@@ -83,8 +85,22 @@ export async function getMyValidTickets(user_id: number): Promise<MyTicket[] | n
     return myTickets;
 }
 
-export async function createTicket(ticket: CreateTicketParam, user_id: number): Promise<Ticket | undefined> {
+export async function createTicket(ticket: CreateTicketParam, user: PublicUser): Promise<Ticket | undefined> {
     const validatedTicket = zCreateTicketParams.parse(ticket);
+
+    const balance = await getPersonnalBalance(user)
+
+    const ticket_price = {
+      "normal":5,
+      "super":10
+    }
+    if(ticket_price[ticket.type] > balance){
+      throw new TicketError("Vous n'avez pas assez d'argent sur votre compte", 403)
+    }
+
+    if(!withdrawMoneyFromAccount(user, ticket_price[ticket.type])){
+      throw new BalanceError("Erreur lors de l'achat, veuillez réessayer")
+    }
 
     if(validatedTicket.used && validatedTicket.used > validatedTicket.max_usage){
       throw new TicketError("Impossible to create ticket where used is > to max_usage", 401)
@@ -96,7 +112,7 @@ export async function createTicket(ticket: CreateTicketParam, user_id: number): 
             type: validatedTicket.type,
             used: validatedTicket.used ? validatedTicket.used : 0,
             max_usage: validatedTicket.max_usage,
-            userId: user_id,
+            userId: user.id,
             buy_date: new Date().toISOString()
         })
         .returning()
