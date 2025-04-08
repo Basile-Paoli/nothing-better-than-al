@@ -21,11 +21,11 @@ describe("Sessions API", () => {
         duration: 120,
     };
 
-    const testSession = {
+    let testSession = {
         duration: 90,
         idMovie: 1,
         idScreen: 1,
-        dateMovie: "2026-11-06T09:46:00Z",
+        dateMovie: "2026-11-07T09:45:00Z",
     };
 
     let createdScreenId: string;
@@ -42,6 +42,9 @@ describe("Sessions API", () => {
 
         const res3 = await adminClient.post("account/ticket", testTicket);
         createdTicketId = res3.data.id;
+
+        testSession.idMovie = Number(createdMovieId)
+        testSession.idScreen = Number(createdScreenId)
     });
 
     afterAll(async () => {
@@ -60,16 +63,15 @@ describe("Sessions API", () => {
 
     describe("POST /sessions/create", () => {
         it("should allow admin to create a session", async () => {
-            const res = await adminClient.post("movies", testSession);
+            const res = await adminClient.post("sessions/create", testSession);
             createdSessionId = res.data.id;
-
-            // Extraction des données nécessaires
+            
             const resData = {
                 id: res.data.id,
                 movie: res.data.movie,
                 cinema: res.data.cinema,
                 dateMovie: res.data.dateMovie,
-                remaining_place: res.data.remaining_place,
+                remaining_places: res.data.remaining_places,
             };
 
             expect(res.status).toBe(200);
@@ -77,21 +79,31 @@ describe("Sessions API", () => {
                 id: expect.any(Number),
                 movie: expect.any(Object),
                 cinema: expect.any(Object),
-                dateMovie: testSession.dateMovie,
-                remaining_place: 100,
+                dateMovie: "2026-11-07T09:45:00.000Z", // Peut pas utilise testSession.date parce que y'a un 0Z en moins en input qu'en sortie
+                remaining_places: 100,
             });
         });
     });
 
     describe("POST /sessions/:id/book", () => {
         it("should allow someone (connected) to book a session", async () => {
+            let testSession2 = {
+                duration: 90,
+                idMovie: Number(createdMovieId),
+                idScreen: Number(createdScreenId),
+                dateMovie: "2026-11-08T09:45:00Z",
+            };
+            const resS = await adminClient.post("sessions/create", testSession2);
+            const createdSessionId2 = resS.data.id;
+
+
             const dataToSend = {
                 ticket_id_used: createdTicketId,
                 nb_place_to_book: 1,
             };
 
             const res = await adminClient.post(
-                `sessions/${createdSessionId}/book`,
+                `sessions/${createdSessionId2}/book`,
                 dataToSend
             );
 
@@ -100,6 +112,8 @@ describe("Sessions API", () => {
 
             expect(res.status).toBe(200);
             expect(resData.success).toBe(true);
+
+            await adminClient.delete(`sessions/${createdSessionId2}`)
         });
     });
 
