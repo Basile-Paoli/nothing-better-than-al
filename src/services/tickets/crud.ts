@@ -4,6 +4,8 @@ import { ticketTable } from "../../db/schema/tickets";
 import { CreateTicketParam, MyTicket, Ticket, zCreateTicketParams} from "../../validators/tickets";
 import { TicketError } from "../../errors/TicketsErrors";
 import { PublicUser } from "../../db/schema";
+import { NotFoundError } from "routing-controllers";
+import { TransactionType } from "../sessions/crud";
 
 
 export async function getTicketsByUserId(user_id: number): Promise<Ticket[] | null>{
@@ -14,7 +16,7 @@ export async function getTicketsByUserId(user_id: number): Promise<Ticket[] | nu
       eq(ticketTable.userId, user_id)
     );
     if (!validTickets || validTickets.length === 0) {
-      throw new TicketError("Ce Ticket n'existe pas", 404)
+      throw new NotFoundError("Ce Ticket n'existe pas")
     }
     return validTickets as Ticket[]
 }
@@ -43,7 +45,7 @@ export async function getTicketsById(ticket_id: number, user: PublicUser): Promi
   );
   }
   if (!validTickets || validTickets.length === 0) {
-    throw new TicketError("Le Ticket n'existe pas", 404)
+    throw new NotFoundError("Le Ticket n'existe pas")
   }
   return validTickets[0] as Ticket
 }  
@@ -85,7 +87,7 @@ export async function createTicket(ticket: CreateTicketParam, user_id: number): 
     const validatedTicket = zCreateTicketParams.parse(ticket);
 
     if(validatedTicket.used && validatedTicket.used > validatedTicket.max_usage){
-      throw new TicketError("Impossible to create ticket where used is > to max_usage")
+      throw new TicketError("Impossible to create ticket where used is > to max_usage", 401)
     }
 
     const [returnTicket] = await db
@@ -106,13 +108,12 @@ export async function createTicket(ticket: CreateTicketParam, user_id: number): 
     return returnTicket;
 }
 
-
-export async function incrementUsed(ticket_id: number, user: PublicUser, nb_increment: number): Promise<Ticket | undefined> {
+export async function incrementTicketUsage(ticket_id: number, user: PublicUser, nb_increment: number, trx: TransactionType): Promise<Ticket | undefined> {
   console.log(ticket_id)
     const ticket = await getTicketsById(ticket_id, user);
   
     if (!ticket) {
-      throw new TicketError("Le ticket spécifié n'existe pas.", 404)
+      throw new NotFoundError("Le ticket spécifié n'existe pas.")
     }
   
     if (ticket.used == ticket.max_usage) {
@@ -122,9 +123,33 @@ export async function incrementUsed(ticket_id: number, user: PublicUser, nb_incr
     if(ticket.used + nb_increment > ticket.max_usage){
       throw new TicketError(`Il n'y a pas assez de place disponible sur ce ticket`, 403)
     }
+    
+    const updatedTicket = await trx.update(ticketTable)
+        .set({ used: ticket.used + nb_increment })
+        .where(eq(ticketTable.id, ticket_id))
+        .returning();
+
+    if (!updatedTicket || updatedTicket.length === 0) {
+      throw new TicketError("Échec de la mise à jour du ticket.")
+    }
   
-    const updatedTicket = await db.update(ticketTable)
-      .set({ used: ticket.used + nb_increment })
+    return updatedTicket[0];
+}
+
+export async function decrementTicketUsage(ticket_id: number, user: PublicUser, nb_decrement: number, trx: TransactionType): Promise<Ticket | undefined> {
+  console.log(ticket_id)
+    const ticket = await getTicketsById(ticket_id, user);
+  
+    if (!ticket) {
+      throw new NotFoundError("Le ticket spécifié n'existe pas")
+    }
+
+    if(ticket.used - nb_decrement < 0){
+      throw new TicketError(`Un Ticket ne peux pas avoir un nombre d'utilisation inférieur à 0`, 403)
+    }
+  
+    const updatedTicket = await trx.update(ticketTable)
+      .set({ used: ticket.used - nb_decrement })
       .where(eq(ticketTable.id, ticket_id))
       .returning();
 

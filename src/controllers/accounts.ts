@@ -1,13 +1,14 @@
-import { Authorized, Body, CurrentUser, Get, JsonController, Patch, Post, QueryParam } from "routing-controllers";
+import { Authorized, Body, CurrentUser, Get, JsonController, Param, Patch, Post, QueryParam } from "routing-controllers";
 import { RequestBody, ResponseBody } from "../open-api/decorators";
 import { PublicUser } from "../db/schema";
-import {z} from "zod";
+import { z} from "zod";
 import { zMyAccount, zMyBalance, Account, zDepositMoneyBalance, Balance } from "../validators/accounts";
 import { MyTicket, Ticket, zCreateTicketParams } from "../validators/tickets";
 import { zTicket} from "../validators/tickets";
 import { getAccountData } from "../services/accounts/crud";
 import { depositPersonnalMoney, getPersonnalBalance, getPersonnalHistoryBalance } from "../services/balances/crud";
 import { createTicket, getMyValidTickets, getTicketsById, getTicketsByUserId } from "../services/tickets/crud";
+import { zId } from "../validators/utils";
 
 @JsonController('/account')
 export class AccountController {
@@ -16,7 +17,15 @@ export class AccountController {
     @Authorized()
     @ResponseBody(200, z.array(zMyAccount))
     async getAccount(@QueryParam('role') role: unknown, @CurrentUser() user: PublicUser): Promise<Account> {
-        return getAccountData(user)
+        let balance = 0
+        try{balance = await getPersonnalBalance(user)}catch(e){console.error(e)}
+        var cleanUser: any = {
+            email: user.email,
+            role: user.role,
+            id : user.id,
+            balance: balance
+        }
+        return getAccountData(cleanUser)
     }
 
     @Get('/balance')
@@ -52,7 +61,9 @@ export class AccountController {
     @Get('/ticket/:id')
     @Authorized()
     @ResponseBody(200, z.array(zTicket))
-    async getTicketById(@CurrentUser() user: PublicUser, @QueryParam('id') ticket_id: number): Promise<MyTicket | null>{
+    async getTicketById(@CurrentUser() user: PublicUser, @Param('id') ticket_id: number): Promise<MyTicket | null>{
+        const validData = zId.parse(ticket_id)
+        console.log(validData)
         return getTicketsById(ticket_id, user)
     }
 

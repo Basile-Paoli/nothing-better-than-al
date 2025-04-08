@@ -4,6 +4,7 @@ import { PublicUser, userTable } from "../../db/schema";
 import { UpdateBalance, Balance } from "../../validators/accounts";
 import { BalanceError } from "../../errors/BalancesErrors";
 import { balanceTable } from "../../db/schema/balances";
+import { NotFoundError } from "routing-controllers";
 
 export async function getPersonnalBalance(user: PublicUser): Promise<number>{
     
@@ -16,7 +17,7 @@ export async function getPersonnalBalance(user: PublicUser): Promise<number>{
         )
 
     if (!res || res.length == 0) {
-        throw new BalanceError("No Balance for you")
+        throw new NotFoundError("No Balance for you")
     }
     
     return res[0]?.balance ? res[0]?.balance : 0
@@ -31,7 +32,7 @@ export async function getPersonnalHistoryBalance(user: PublicUser): Promise<Bala
         .orderBy(desc(balanceTable.deposit_date))
 
     if (!res || res.length == 0) {
-        throw new BalanceError("No Balance for you")
+        throw new NotFoundError("No Balance for you")
     }
 
     console.log(res)
