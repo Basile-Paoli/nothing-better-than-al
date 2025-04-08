@@ -16,10 +16,13 @@ export class AccountController {
     @Authorized()
     @ResponseBody(200, z.array(zMyAccount))
     async getAccount(@QueryParam('role') role: unknown, @CurrentUser() user: PublicUser): Promise<Account> {
-        var cleanUser: PublicUser = {
+        let balance = 0
+        try{balance = await getPersonnalBalance(user)}catch(e){console.error(e)}
+        var cleanUser: any = {
             email: user.email,
             role: user.role,
             id : user.id,
+            balance: balance
         }
         return getAccountData(cleanUser)
     }
