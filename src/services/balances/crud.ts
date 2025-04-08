@@ -74,3 +74,24 @@ export async function depositPersonnalMoney(user: PublicUser, param: UpdateBalan
 
     return true
 }
+
+export async function withdrawMoneyFromAccount(user: PublicUser, amount: number): Promise<boolean> {
+    try {
+        const result = await db
+            .update(userTable)
+            .set({
+                balance: sql`${userTable.balance} - ${amount}`
+            })
+            .where(eq(userTable.id, user.id))
+            .returning();
+
+        if (result && result.length > 0) {
+            return true;
+        }
+
+        return false;
+    } catch (error) {
+        console.error("Error withdrawing money:", error);
+        return false;
+    }
+}
