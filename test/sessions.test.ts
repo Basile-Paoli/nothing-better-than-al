@@ -40,7 +40,7 @@ describe("Sessions API", () => {
         const res2 = await adminClient.post("screens", testScreen);
         createdScreenId = res2.data.id;
 
-        const res3 = await adminClient.post("account/ticket", testTicket);
+        const res3 = await adminClient.post("account/tickets", testTicket);
         createdTicketId = res3.data.id;
 
         testSession.idMovie = Number(createdMovieId)

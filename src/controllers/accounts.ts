@@ -43,21 +43,21 @@ export class AccountController {
 
 	// ---------------------------------------------------- //
 
-	@Get('/ticket')
+	@Get('/tickets')
 	@Authorized()
 	@ResponseBody(200, z.array(zTicket))
 	async getTicket(@CurrentUser() user: PublicUser): Promise<Ticket[] | null> {
 		return getTicketsByUserId(user.id)
 	}
 
-	@Get('/ticket/valid')
+	@Get('/tickets/valid')
 	@Authorized()
 	@ResponseBody(200, z.array(zTicket))
 	async getValidTicket(@CurrentUser() user: PublicUser): Promise<MyTicket[] | null> {
 		return getMyValidTickets(user.id)
 	}
 
-	@Get('/ticket/:id')
+	@Get('/tickets/:id')
 	@Authorized()
 	@ResponseBody(200, z.array(zTicket))
 	async getTicketById(@CurrentUser() user: PublicUser, @Param('id') ticket_id: number): Promise<MyTicket | null> {
@@ -68,7 +68,7 @@ export class AccountController {
 
 	// ---------------------------------------------------- //
 
-	@Post('/ticket')
+	@Post('/tickets')
 	@Authorized()
 	@RequestBody(zCreateTicketParams)
 	@ResponseBody(200, z.array(zTicket))
@@ -80,7 +80,7 @@ export class AccountController {
 
 	// ---------------------------------------------------- //
 
-	/*@Patch('/ticket/update')
+	/*@Patch('/tickets/update')
 	@Authorized()
 	@RequestBody(zUpdateTicketParams)
 	@ResponseBody(200, z.array(zTicket))
