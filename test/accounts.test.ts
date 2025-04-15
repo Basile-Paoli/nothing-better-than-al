@@ -140,7 +140,7 @@ describe('Account API', () => {
         it('should return an error message if the ticket does not exist (13)', async () => {
             try {
                 const res = await adminClient.get("account/ticket/13");
-            } catch (error) {
+            } catch (error: any) {
                 expect(error.response).toBeDefined();
                 expect(error.response.status).toBe(404);
                 expect(error.response.data).toMatchObject({
