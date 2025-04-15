@@ -13,11 +13,15 @@ describe('Account API', () => {
         used: 10,
         max_usage: 10,
     };
+    let ticket1Id
+    let ticket2Id
 
     beforeAll(async () => {
         const res3 = await adminClient.patch("account/balance", {balance: 50});
         const res = await adminClient.post('account/ticket', testTicket);
         const res2 = await adminClient.post('account/ticket', testTicket2);
+        ticket1Id = res.data.id
+        ticket2Id = res2.data.id
     });
 
     describe('GET /account', () => {
@@ -79,27 +83,33 @@ describe('Account API', () => {
             const res = await adminClient.get("account/ticket");
 
             expect(res.data.length).toBeGreaterThan(0);
-            const validTicket = res.data[0];
-            expect(validTicket).toMatchObject({
-                id: expect.any(Number),
-                userId: expect.any(Number),
-                max_usage: expect.any(Number),
-                used: expect.any(Number),
-                type: expect.any(String),
-                buy_date: expect.any(String),
-            });
-            expect(validTicket.used).toBeLessThanOrEqual(validTicket.max_usage);
+            res.data.forEach((tic) => {
+                if(tic.id == ticket1Id){
+                    expect(tic).toMatchObject({
+                        id: expect.any(Number),
+                        userId: expect.any(Number),
+                        max_usage: expect.any(Number),
+                        used: expect.any(Number),
+                        buy_date: expect.any(String),
+                        type: expect.any(String),
+                    });
+                    expect(tic.used).toBeLessThanOrEqual(tic.max_usage);
+                }
+            })
 
-            const invalidTicket = res.data[1];
-            expect(invalidTicket).toMatchObject({
-                id: expect.any(Number),
-                userId: expect.any(Number),
-                max_usage: expect.any(Number),
-                used: expect.any(Number),
-                buy_date: expect.any(String),
-                type: expect.any(String),
-            });
-            expect(invalidTicket.used).toEqual(invalidTicket.max_usage);
+            res.data.forEach((tic) => {
+                if(tic.id == ticket2Id){
+                    expect(tic).toMatchObject({
+                        id: expect.any(Number),
+                        userId: expect.any(Number),
+                        max_usage: expect.any(Number),
+                        used: expect.any(Number),
+                        buy_date: expect.any(String),
+                        type: expect.any(String),
+                    });
+                    expect(tic.used).toEqual(tic.max_usage);
+                }
+            })
         });
     });
     
