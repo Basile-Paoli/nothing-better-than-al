@@ -4,7 +4,7 @@
  */
 
 import type {Config} from 'jest';
-import useFakeTimers = jest.useFakeTimers;
+//import useFakeTimers = jest.useFakeTimers;
 
 const config: Config = {
 	// All imported modules in your tests should be mocked automatically

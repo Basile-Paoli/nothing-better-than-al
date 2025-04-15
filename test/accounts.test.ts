@@ -15,9 +15,9 @@ describe('Account API', () => {
     };
 
     beforeAll(async () => {
+        const res3 = await adminClient.patch("account/balance", {balance: 50});
         const res = await adminClient.post('account/ticket', testTicket);
         const res2 = await adminClient.post('account/ticket', testTicket2);
-        const res3 = await adminClient.patch("account/balance", {balance: 10});
     });
 
     describe('GET /account', () => {
@@ -179,7 +179,7 @@ describe('Account API', () => {
     describe('GET /account/balance', () => {
         it('should get the current balance of the user', async () => {
             const res = await adminClient.get("account/balance");
-            expect(res.data).toBe(10)
+            expect(res.data).toBe(30)
         });
     });
 
@@ -197,7 +197,7 @@ describe('Account API', () => {
     describe('GET /account/balance', () => {
         it('should get the current balance of the user', async () => {
             const res = await adminClient.get("account/balance");
-            expect(res.data).toBe(20)
+            expect(res.data).toBe(40)
         });
     });
     

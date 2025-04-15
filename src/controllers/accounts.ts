@@ -1,6 +1,6 @@
 import {Authorized, Body, CurrentUser, Get, JsonController, Param, Patch, Post, QueryParam} from "routing-controllers";
 import {RequestBody, ResponseBody} from "../open-api/decorators";
-import {PublicUser} from "../db/schema";
+import {PublicUser, User} from "../db/schema";
 import {z} from "zod";
 import {zMyAccount, zMyBalance, Account, zDepositMoneyBalance, Balance} from "../validators/accounts";
 import {MyTicket, Ticket, zCreateTicketParams} from "../validators/tickets";
@@ -16,11 +16,12 @@ export class AccountController {
 	@Get('/')
 	@Authorized()
 	@ResponseBody(200, z.array(zMyAccount))
-	async getAccount(@QueryParam('role') role: unknown, @CurrentUser() user: PublicUser): Promise<Account> {
-		const cleanUser: PublicUser = {
+	async getAccount(@QueryParam('role') role: unknown, @CurrentUser() user: User): Promise<Account> {
+		const cleanUser = {
 			email: user.email,
 			role: user.role,
 			id: user.id,
+			balance: user.balance
 		}
 
 		return getAccountData(cleanUser)
